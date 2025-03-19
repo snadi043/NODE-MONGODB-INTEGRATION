@@ -10,7 +10,7 @@ class Product{
     this.price = price;
     this.imageUrl = imageUrl;
     this.description = description;
-    this._id = new ObjectId(id);
+    this._id = id ? new ObjectId(id) : null;
   }
 
   // Save() is the method to add the product to the database which is a post action.
@@ -58,6 +58,15 @@ class Product{
     .catch(err => {
       console.log(err);
     });
+  }
+
+  // deleteOne() is the static method to get a particular products from the database which is the get action based on the filter added to the collection.
+  static deleteById(prodId){
+    const db = getDb()
+    return db.collection('products')
+    .deleteOne({_id: new ObjectId(prodId)})
+    .then(product => {console.log(product)})
+    .catch(err => {console.log(err)});
   }
 }
 
