@@ -2,25 +2,34 @@
 
 // const sequelize = require('../util/database');
 
-// const mongodb = require('mongodb');
+const mongodb = require('mongodb');
 
-const ObjectId = require('mongodb').ObjectId;
+const ObjectId = mongodb.ObjectId;
 
 const getDb = require('../util/database').getDb;
 
-
 class Product{
-  constructor(title, price, imageUrl, description){
+  constructor(title, price, imageUrl, description, id){
     this.title = title;
     this.price = price;
     this.imageUrl = imageUrl;
     this.description = description;
+    this._id = id;
   }
 
   // Save() is the method to add the product to the database which is a post action.
   save(){
     const db = getDb();
-    return db.collection('products').insertOne(this) // insertOne is the mongoDB method to store the document/record into the database.
+    let dbOp;
+    if(this._id){
+    // Update the exisiting document if the id is already existing in the database.
+      dbOp = db.collection('products').updateOne({_id: new ObjectId(this._id)}, {$set: this});
+    }
+    // Insert a new document if the id is not present in the database.
+    else{
+      dbOp = db.collection('products').insertOne(this) // insertOne is the mongoDB method to store the document/record into the database.
+    }
+    return dbOp
     .then(result => {
       console.log(result);
     })
