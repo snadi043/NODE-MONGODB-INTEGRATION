@@ -1,9 +1,5 @@
 const Product = require('../models/product');
 
-const mongodb = require('mongodb');
-
-const ObjectId = mongodb.ObjectId;
-
 // getAddProduct() is the middleware function to handle the GET request to respond when admin tries to add a admin managed product to the list of products.
 // navigation -> clicked on "Add Product" in the menu to redirect to view "add-product".
 exports.getAddProduct = (req, res, next) => {
@@ -62,7 +58,7 @@ exports.postEditProduct = (req, res, next) => {
   const updatedPrice = req.body.price;
   const updatedImageUrl = req.body.imageUrl;
   const updatedDesc = req.body.description;
-  const product = new Product(updatedTitle, updatedPrice, updatedImageUrl, updatedDesc, new ObjectId(prodId));
+  const product = new Product(updatedTitle, updatedPrice, updatedImageUrl, updatedDesc, prodId);
     product.save()
     .then(result => {
       console.log('UPDATED PRODUCT!');

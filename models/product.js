@@ -1,7 +1,3 @@
-// const Sequelize = require('sequelize');
-
-// const sequelize = require('../util/database');
-
 const mongodb = require('mongodb');
 
 const ObjectId = mongodb.ObjectId;
@@ -14,7 +10,7 @@ class Product{
     this.price = price;
     this.imageUrl = imageUrl;
     this.description = description;
-    this._id = id;
+    this._id = new ObjectId(id);
   }
 
   // Save() is the method to add the product to the database which is a post action.
@@ -23,7 +19,7 @@ class Product{
     let dbOp;
     if(this._id){
     // Update the exisiting document if the id is already existing in the database.
-      dbOp = db.collection('products').updateOne({_id: new ObjectId(this._id)}, {$set: this});
+      dbOp = db.collection('products').updateOne({_id: this._id}, {$set: this});
     }
     // Insert a new document if the id is not present in the database.
     else{
