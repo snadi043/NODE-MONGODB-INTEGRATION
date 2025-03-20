@@ -1,5 +1,7 @@
 const Product = require('../models/product');
 
+// getAddProduct() is the middleware function to handle the GET request to respond when admin tries to add a admin managed product to the list of products.
+// navigation -> clicked on "Add Product" in the menu to redirect to view "add-product".
 exports.getAddProduct = (req, res, next) => {
   res.render('admin/edit-product', {
     pageTitle: 'Add Product',
@@ -8,20 +10,15 @@ exports.getAddProduct = (req, res, next) => {
   });
 };
 
+// postAddProduct() is the middleware function to handle the POST request to respond when admin adds a admin managed product after clicking on "ADD PRODUCT" button.
+// navigation -> clicked on "Add Product" in the menu to redirect to view "add-product" -> clicked on "ADD PRODUCT" -> save the product to the database.
 exports.postAddProduct = (req, res, next) => {
   const title = req.body.title;
-  const imageUrl = req.body.imageUrl;
   const price = req.body.price;
+  const imageUrl = req.body.imageUrl;
   const description = req.body.description;
-  req.user
-    .createProduct({
-      title: title,
-      price: price,
-      imageUrl: imageUrl,
-      description: description
-    })
-    .then(result => {
-      // console.log(result);
+  const product = new Product(title, price, imageUrl, description);
+    product.save().then(result => {
       console.log('Created Product');
       res.redirect('/admin/products');
     })
@@ -30,17 +27,16 @@ exports.postAddProduct = (req, res, next) => {
     });
 };
 
+// getEditProduct() is the middleware function to handle the GET request to respond when admin tries to edit an admin managed product.
+// navigation -> clicked on "Admin Products" in the menu to redirect to view "products" -> clicked on "EDIT" button -> edit the product.
 exports.getEditProduct = (req, res, next) => {
   const editMode = req.query.edit;
   if (!editMode) {
     return res.redirect('/');
   }
   const prodId = req.params.productId;
-  req.user
-    .getProducts({ where: { id: prodId } })
-    // Product.findById(prodId)
-    .then(products => {
-      const product = products[0];
+  Product.findById(prodId)
+    .then(product => {
       if (!product) {
         return res.redirect('/');
       }
@@ -54,20 +50,16 @@ exports.getEditProduct = (req, res, next) => {
     .catch(err => console.log(err));
 };
 
+// postditProduct() is the middleware function to handle the POST request to respond when admin edited an admin managed product after clicking on "EDIT" button.
+// navigation -> clicked on "Admin Products" in the menu to redirect to view "products" -> clicked on "EDIT" button -> edited the product -> clicked on "UPDATE" button to update it in the database.
 exports.postEditProduct = (req, res, next) => {
   const prodId = req.body.productId;
   const updatedTitle = req.body.title;
   const updatedPrice = req.body.price;
   const updatedImageUrl = req.body.imageUrl;
   const updatedDesc = req.body.description;
-  Product.findByPk(prodId)
-    .then(product => {
-      product.title = updatedTitle;
-      product.price = updatedPrice;
-      product.description = updatedDesc;
-      product.imageUrl = updatedImageUrl;
-      return product.save();
-    })
+  const product = new Product(updatedTitle, updatedPrice, updatedImageUrl, updatedDesc, prodId);
+    product.save()
     .then(result => {
       console.log('UPDATED PRODUCT!');
       res.redirect('/admin/products');
@@ -76,8 +68,7 @@ exports.postEditProduct = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-  req.user
-    .getProducts()
+  Product.fetchAll()
     .then(products => {
       res.render('admin/products', {
         prods: products,
@@ -88,13 +79,12 @@ exports.getProducts = (req, res, next) => {
     .catch(err => console.log(err));
 };
 
+// postDeleteProduct() is the middleware function to handle the POST request to respond when admin deletes an admin managed product after clicking on "DELETE" button.
+// navigation -> clicked on "Admin Products" in the menu to redirect to view "products" -> clicked on "DELETE" button ->  deleted it in the database.
 exports.postDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
-  Product.findByPk(prodId)
-    .then(product => {
-      return product.destroy();
-    })
-    .then(result => {
+  Product.deleteById(prodId)
+    .then(() => {
       console.log('DESTROYED PRODUCT');
       res.redirect('/admin/products');
     })
