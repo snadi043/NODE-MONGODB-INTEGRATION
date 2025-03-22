@@ -74,10 +74,29 @@ class Users{
 
   addOrders(){
     const db = getDb();
-    return db.collection('orders').insertOne(this.cart).then(result => {
-      this.cart = {items: []};
-      return db.collection('users').updateOne({_id: new ObjectId(this._id)}, {$set: {cart:{items: []}}});
+    // Getting the access to the products to disply in the orders.
+    return this.getCart().then(products => {
+      // Getting the access to the users information in the orders while adding an order to the collection.
+      const orders = {
+        items: products,
+        users: {
+          _id: new ObjectId(this._id),
+          name: this.name
+        }
+      };
+      return db.collection('orders').insertOne(orders);
     })
+    .then(result => {
+        this.cart = {items: []};
+        return db.collection('users').updateOne({_id: new ObjectId(this._id)}, {$set: {cart:{items: []}}});
+      })
+  }
+
+  getOrders(){
+    const db = getDb();
+    return db.collection('orders')
+    .find({'users._id' : new ObjectId(this._id)}) // finding the properties within the collections in the find() method provided by mongoDb using the ''.
+    .toArray();
   }
 }
 
