@@ -11,14 +11,17 @@ class Users{
     this.cart = cart; // {items: [{}]}
     this._id = id;
   }
+
   save(){
     const db = getDb();
     return db.collection('users').insertOne(this);
   }
+
   static getUserById(userId){
     const db = getDb();
     return db.collection('users').findOne({_id: new ObjectId(userId)});
   }
+
   // addToCart() is the method which depends upon the userId and makes a relation between user and the cart.
   // Based on the userId, the cart gets the access to add the products.
   addToCart(product){
@@ -43,6 +46,7 @@ class Users{
     const db = getDb(); // getting the access to the database connection.
     return db.collection('users').updateOne({_id: new ObjectId(this._id)}, {$set: {cart: updatedCart}})
   }
+
   getCart(){
     const db = getDb();
     const productIds = this.cart.items.map(i => { 
@@ -58,6 +62,14 @@ class Users{
         }
       });
     });
+  }
+
+  deleteCartProductById(productId){
+    const db = getDb();
+    const updatedCartItems = this.cart.items.filter(products => {
+      return products.productId.toString() !== productId.toString();
+    })
+    return db.collection('users').updateOne({_id: new Object(this._id)}, {$set: {cart: {items: updatedCartItems}}});
   }
 }
 
