@@ -1,3 +1,35 @@
+// Importing the mongoose package to create the model.
+const mongoose = require('mongoose');
+
+// Importing the Schema to create the Schema for the model.
+const productSchema = mongoose.Schema({
+  title: {
+    type: String,
+    required: true,
+  },
+  price: {
+    type: Number,
+    required: true,
+  },
+  imageUrl: {
+    type: String,
+    required: true,
+  },
+  description: {
+    type: String,
+    required: true
+  }
+});
+
+// Exporting the model to use it in the application which takes two arguments that is the name of the 
+// model which is then replicated to the lowercase and plural form of it to create the collection with 
+// that name and also takes schema name as the second argument.
+module.exports = mongoose.model('Product', productSchema); 
+
+
+
+
+
 // const mongodb = require('mongodb');
 
 // const ObjectId = mongodb.ObjectId;

@@ -8,7 +8,7 @@ const mongoose = require('mongoose');
 //Importing the method to listen to the localhost and run the node application.
 // const mongoConnect = require('./util/database').mongoConnect;
 
-const User = require('./models/user');
+// const User = require('./models/user');
 
 const errorController = require('./controllers/error');
 
@@ -23,14 +23,14 @@ const shopRoutes = require('./routes/shop');
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use((req, res, next) => {
-  User.getUserById('67dc0bd3965d52b7a4cfe07f')
-    .then(user => {
-      req.user = new User(user.name, user.email, user.cart, user._id);
-      next();
-    })
-    .catch(err => console.log(err));
-});
+// app.use((req, res, next) => {
+//   User.getUserById('67dc0bd3965d52b7a4cfe07f')
+//     .then(user => {
+//       req.user = new User(user.name, user.email, user.cart, user._id);
+//       next();
+//     })
+//     .catch(err => console.log(err));
+// });
 
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
