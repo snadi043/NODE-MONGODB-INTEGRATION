@@ -5,12 +5,13 @@ const ObjectId = mongodb.ObjectId;
 const getDb = require('../util/database').getDb;
 
 class Product{
-  constructor(title, price, imageUrl, description, id){
+  constructor(title, price, imageUrl, description, id, userId){
     this.title = title;
     this.price = price;
     this.imageUrl = imageUrl;
     this.description = description;
     this._id = id ? new ObjectId(id) : null;
+    this.userId = userId;
   }
 
   // Save() is the method to add the product to the database which is a post action.
@@ -69,28 +70,5 @@ class Product{
     .catch(err => {console.log(err)});
   }
 }
-
-
-// const Product = sequelize.define('product', {
-//   id: {
-//     type: Sequelize.INTEGER,
-//     autoIncrement: true,
-//     allowNull: false,
-//     primaryKey: true
-//   },
-//   title: Sequelize.STRING,
-//   price: {
-//     type: Sequelize.DOUBLE,
-//     allowNull: false
-//   },
-//   imageUrl: {
-//     type: Sequelize.STRING,
-//     allowNull: false
-//   },
-//   description: {
-//     type: Sequelize.STRING,
-//     allowNull: false
-//   }
-// });
 
 module.exports = Product;
