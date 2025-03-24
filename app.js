@@ -3,8 +3,10 @@ const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 
+const mongoose = require('mongoose');
+
 //Importing the method to listen to the localhost and run the node application.
-const mongoConnect = require('./util/database').mongoConnect;
+// const mongoConnect = require('./util/database').mongoConnect;
 
 const User = require('./models/user');
 
@@ -36,6 +38,16 @@ app.use(shopRoutes);
 app.use(errorController.get404);
 
 // Integration with the client and listening to the port.
-mongoConnect(() => {
+// mongoConnect(() => {
+//   app.listen(3000);
+// })
+
+// Connecting the mongoose package to the mongoDb to make use of ODM(Object Document Mapping) concept.
+// This bascially takes care of all the heavy lifting behind the scenes to create the collections & documents to store the data.
+mongoose.connect('mongodb+srv://NodeMongo:node-mongo-integration@node-mongo-integration.025ge.mongodb.net/shop?retryWrites=true&w=majority&appName=Node-Mongo-Integration')
+.then(result => {
   app.listen(3000);
+})
+.catch(err => {
+  console.log(err);
 })
