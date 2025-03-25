@@ -8,7 +8,7 @@ const mongoose = require('mongoose');
 //Importing the method to listen to the localhost and run the node application.
 // const mongoConnect = require('./util/database').mongoConnect;
 
-// const User = require('./models/user');
+const User = require('./models/user');
 
 const errorController = require('./controllers/error');
 
@@ -23,14 +23,14 @@ const shopRoutes = require('./routes/shop');
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// app.use((req, res, next) => {
-//   User.getUserById('67dc0bd3965d52b7a4cfe07f')
-//     .then(user => {
-//       req.user = new User(user.name, user.email, user.cart, user._id);
-//       next();
-//     })
-//     .catch(err => console.log(err));
-// });
+app.use((req, res, next) => {
+  User.getUserById('67e2afbe313507507b9d830e')
+    .then(user => {
+      req.user = new User(user.name, user.email, user.cart, user._id);
+      next();
+    })
+    .catch(err => console.log(err));
+});
 
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
@@ -46,7 +46,19 @@ app.use(errorController.get404);
 // This bascially takes care of all the heavy lifting behind the scenes to create the collections & documents to store the data.
 mongoose.connect('mongodb+srv://NodeMongo:node-mongo-integration@node-mongo-integration.025ge.mongodb.net/shop?retryWrites=true&w=majority&appName=Node-Mongo-Integration')
 .then(result => {
-  app.listen(3000);
+  User.findById().then(user => {
+    if(!user){
+      const user = new User({
+        name: 'Sai',
+        email: 'sai@test.com',
+        cart: {
+          items: []
+        },
+      });
+      user.save();
+      app.listen(3000);
+    }
+  });
 })
 .catch(err => {
   console.log(err);
