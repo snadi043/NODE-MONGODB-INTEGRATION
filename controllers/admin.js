@@ -75,6 +75,8 @@ exports.postEditProduct = (req, res, next) => {
 
 exports.getProducts = (req, res, next) => {
   Product.find()
+  // .select('title price -_id') // select() -> It is a mongoose provided method which can help to fetch only the mentioned fields from the document also has the provision to leave the fields which are unnecessary.
+  // .populate('userId', 'name') // populate() -> It is a mongoose provided method which is used to fetch the fields from the collection.
     .then(products => {
       res.render('admin/products', {
         prods: products,
