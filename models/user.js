@@ -24,6 +24,32 @@ const userSchema = mongoose.Schema({
     }
 });
 
+//mongoose provides us with the provision to add methods to the models with the extension on the particular schema as show in the line 28.
+userSchema.methods.addToCart = function(product){
+    // Cheking if the product is existing in the cart already in the collection by comparing the indexes
+    const cartProdutIndex = this.cart.items.findIndex(cp => {
+        return cp.productId.toString() === product._id.toString();
+    });
+    let newQuantity = 1;
+    const updatedCartItems = [...this.cart.items] // getting access to all the items in the cart so that they can be edited as per the conditions.
+    // If the product is already existing then increase the quantity by 1.
+    if(cartProdutIndex >= 0){
+        newQuantity = this.cart.items[cartProdutIndex].quantity + 1; 
+        updatedCartItems[cartProdutIndex].quantity = newQuantity;
+    }
+    // If it is new product then create a new object of the item with the product data and the quantity with the push() method.
+    else{
+        updatedCartItems.push({productId: product._id, quantity: newQuantity});
+    }
+    // updatedCart is basically the format/schema of the cart that is to be stored in the users collection.
+    // Finally always passing the information of the updatedCartItems to the updatedCart.
+    const updatedCart = {
+        items: updatedCartItems
+    };
+    this.cart = updatedCart; // Adding back the changes in the cart from the addToCart() method back to the cart property of this model.
+    return this.save() // save -> it is mongoDb provided method.
+}
+
 module.exports = mongoose.model('User', userSchema);
 
 // const mongoDB = require('mongodb');
