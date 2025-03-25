@@ -24,9 +24,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use((req, res, next) => {
-  User.getUserById('67e2afbe313507507b9d830e')
+  User.findById('67e2bad2ede014c342373de4')
     .then(user => {
-      req.user = new User(user.name, user.email, user.cart, user._id);
+      req.user = user;
       next();
     })
     .catch(err => console.log(err));
@@ -46,7 +46,7 @@ app.use(errorController.get404);
 // This bascially takes care of all the heavy lifting behind the scenes to create the collections & documents to store the data.
 mongoose.connect('mongodb+srv://NodeMongo:node-mongo-integration@node-mongo-integration.025ge.mongodb.net/shop?retryWrites=true&w=majority&appName=Node-Mongo-Integration')
 .then(result => {
-  User.findById().then(user => {
+  User.findOne().then(user => {
     if(!user){
       const user = new User({
         name: 'Sai',
@@ -56,9 +56,9 @@ mongoose.connect('mongodb+srv://NodeMongo:node-mongo-integration@node-mongo-inte
         },
       });
       user.save();
-      app.listen(3000);
     }
   });
+  app.listen(3000);
 })
 .catch(err => {
   console.log(err);

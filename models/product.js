@@ -18,6 +18,11 @@ const productSchema = mongoose.Schema({
   description: {
     type: String,
     required: true
+  },
+  userId:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User', // ref -> is the property which checks for the particular model to make use of that model and create a connection.
+    required: true
   }
 });
 
