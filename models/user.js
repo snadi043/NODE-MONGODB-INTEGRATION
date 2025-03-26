@@ -50,6 +50,14 @@ userSchema.methods.addToCart = function(product){
     return this.save() // save -> it is mongoDb provided method.
 }
 
+userSchema.methods.deleteCartProduct = function(productId){
+    const updatedCartItems = this.cart.items.filter(products => {
+    return products.productId.toString() !== productId.toString();
+    });
+    this.cart.items = updatedCartItems;
+    return this.save();
+}
+
 module.exports = mongoose.model('User', userSchema);
 
 // const mongoDB = require('mongodb');
