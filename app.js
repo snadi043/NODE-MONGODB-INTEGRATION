@@ -3,8 +3,10 @@ const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 
+const mongoose = require('mongoose');
+
 //Importing the method to listen to the localhost and run the node application.
-const mongoConnect = require('./util/database').mongoConnect;
+// const mongoConnect = require('./util/database').mongoConnect;
 
 const User = require('./models/user');
 
@@ -22,9 +24,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use((req, res, next) => {
-  User.getUserById('67dc0bd3965d52b7a4cfe07f')
+  User.findById('67e2bad2ede014c342373de4')
     .then(user => {
-      req.user = new User(user.name, user.email, user.cart, user._id);
+      req.user = user;
       next();
     })
     .catch(err => console.log(err));
@@ -36,6 +38,28 @@ app.use(shopRoutes);
 app.use(errorController.get404);
 
 // Integration with the client and listening to the port.
-mongoConnect(() => {
+// mongoConnect(() => {
+//   app.listen(3000);
+// })
+
+// Connecting the mongoose package to the mongoDb to make use of ODM(Object Document Mapping) concept.
+// This bascially takes care of all the heavy lifting behind the scenes to create the collections & documents to store the data.
+mongoose.connect('mongodb+srv://NodeMongo:node-mongo-integration@node-mongo-integration.025ge.mongodb.net/shop?retryWrites=true&w=majority&appName=Node-Mongo-Integration')
+.then(result => {
+  User.findOne().then(user => {
+    if(!user){
+      const user = new User({
+        name: 'Sai',
+        email: 'sai@test.com',
+        cart: {
+          items: []
+        },
+      });
+      user.save();
+    }
+  });
   app.listen(3000);
+})
+.catch(err => {
+  console.log(err);
 })

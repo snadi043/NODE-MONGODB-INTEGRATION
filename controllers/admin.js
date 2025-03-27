@@ -17,8 +17,7 @@ exports.postAddProduct = (req, res, next) => {
   const price = req.body.price;
   const imageUrl = req.body.imageUrl;
   const description = req.body.description;
-  const userId = req.user._id;
-  const product = new Product(title, price, imageUrl, description, null, userId);
+  const product = new Product({title: title, price: price, imageUrl: imageUrl, description: description, userId: req.user});
     product.save().then(result => {
       console.log('Created Product');
       res.redirect('/admin/products');
@@ -59,17 +58,25 @@ exports.postEditProduct = (req, res, next) => {
   const updatedPrice = req.body.price;
   const updatedImageUrl = req.body.imageUrl;
   const updatedDesc = req.body.description;
-  const product = new Product(updatedTitle, updatedPrice, updatedImageUrl, updatedDesc, prodId);
-    product.save()
-    .then(result => {
-      console.log('UPDATED PRODUCT!');
-      res.redirect('/admin/products');
-    })
-    .catch(err => console.log(err));
+  Product.findById(prodId).then(product => {
+    product.title = updatedTitle;
+    product.price = updatedPrice;
+    product.imageUrl = updatedImageUrl;
+    product.description = updatedDesc;
+    return product.save()
+  }
+)
+  .then(result => {
+    console.log('UPDATED PRODUCT!');
+    res.redirect('/admin/products');
+  })
+  .catch(err => console.log(err));
 };
 
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll()
+  Product.find()
+  // .select('title price -_id') // select() -> It is a mongoose provided method which can help to fetch only the mentioned fields from the document also has the provision to leave the fields which are unnecessary.
+  // .populate('userId', 'name') // populate() -> It is a mongoose provided method which is used to fetch the fields from the collection.
     .then(products => {
       res.render('admin/products', {
         prods: products,
@@ -84,7 +91,7 @@ exports.getProducts = (req, res, next) => {
 // navigation -> clicked on "Admin Products" in the menu to redirect to view "products" -> clicked on "DELETE" button ->  deleted it in the database.
 exports.postDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
-  Product.deleteById(prodId)
+  Product.findByIdAndDelete(prodId)
     .then(() => {
       console.log('DESTROYED PRODUCT');
       res.redirect('/admin/products');
