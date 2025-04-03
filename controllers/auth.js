@@ -1,17 +1,17 @@
 // Controller for the Login functionality to handle all the related requests for the authentication in the application.
  
 exports.getLogin = (req, res, next) => {
-    const isLoggedIn = req.get('Cookie');
+    // const isLoggedIn = req.get('Cookie');
     res.render('auth/login', {
         path: '/login',
         pageTitle: 'Login',
-        isAuthenticated: isLoggedIn
+        isAuthenticated: req.isAuthenticated,
     });
 }
 
 exports.postLogin = (req, res, next) => {
     // // While handling the action that is after login button is clicked, we plan to pass the isAuthenticated value through the request to display the reamining two routes conditionally.
-    // req.isAuthenticated = true; 
+    req.isAuthenticated = true; 
     res.setHeader('Set-Cookie', 'isLoggedIn=true');
     res.redirect('/');
 }
