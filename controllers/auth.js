@@ -6,3 +6,8 @@ exports.getLogin = (req, res, next) => {
         pageTitle: 'Login',
     });
 }
+
+exports.postLogin = (req, res, next) => {
+    req.isAuthenticated = true; // While handling the action that is after login button is clicked, we plan to pass the isAuthenticated value through the request to display the reamining two routes conditionally.
+    res.redirect('/');
+}
