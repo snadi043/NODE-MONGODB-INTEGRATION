@@ -1,8 +1,8 @@
+const User = require('../models/user');
+
 // Controller for the Login functionality to handle all the related requests for the authentication in the application.
  
 exports.getLogin = (req, res, next) => {
-    // const isLoggedIn = req.get('Cookie');
-    console.log(req.session.isLoggedIn);
     res.render('auth/login', {
         path: '/login',
         pageTitle: 'Login',
@@ -14,8 +14,13 @@ exports.postLogin = (req, res, next) => {
     // // While handling the action that is after login button is clicked, we plan to pass the isAuthenticated value through the request to display the reamining two routes conditionally.
     // req.isAuthenticated = true; 
     // res.setHeader('Set-Cookie', 'isLoggedIn=true');
-    req.session.isLoggedIn = true;
-    res.redirect('/');
+    User.findById('67e2bad2ede014c342373de4') // Fetching the user after logging in and storing the user value in the session.
+    .then(user => {
+        req.session.isLoggedIn = true;
+        req.session.user = user;
+        res.redirect('/');
+    })
+    .catch(err => console.log(err));
 }
 
 // When storing the value like in line 12 to use it to help during the handling of HTTP request it is not stored and helpful for every single request because once the request is processed it is ended there and everytime 

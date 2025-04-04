@@ -31,15 +31,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({secret: 'this is the most secret property to be set inorder to attain high security', saveUninitialized: false, resave: false, store: store}));
 
-app.use((req, res, next) => {
-  User.findById('67e2bad2ede014c342373de4')
-    .then(user => {
-      req.user = user;
-      next();
-    })
-    .catch(err => console.log(err));
-});
-
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);

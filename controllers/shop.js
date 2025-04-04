@@ -8,7 +8,7 @@ exports.getProducts = (req, res, next) => {
         prods: products,
         pageTitle: 'All Products',
         path: '/products',
-        isAuthenticated: req.isAuthenticated
+        isAuthenticated: req.session.isLoggedIn
       });
     })
     .catch(err => {
@@ -24,7 +24,7 @@ exports.getProduct = (req, res, next) => {
         product: product,
         pageTitle: product.title,
         path: '/products',
-        isAuthenticated: req.isAuthenticated
+        isAuthenticated: req.session.isLoggedIn
       });
     })
     .catch(err => console.log(err));
@@ -37,7 +37,7 @@ exports.getIndex = (req, res, next) => {
         prods: products,
         pageTitle: 'Shop',
         path: '/',
-        isAuthenticated: req.isAuthenticated
+        isAuthenticated: req.session.isLoggedIn
       });
     })
     .catch(err => {
@@ -46,7 +46,7 @@ exports.getIndex = (req, res, next) => {
 };
 
 exports.getCart = (req, res, next) => {
-  req.user
+  req.session.user
   .populate('cart.items.productId') // populate() is the mongoose provided method which gets all the fields from the collection that is specified in the method.
   // .execPopulate()
     .then(user => {
@@ -55,7 +55,7 @@ exports.getCart = (req, res, next) => {
         path: '/cart',
         pageTitle: 'Your Cart',
         products: products,
-        isAuthenticated: req.isAuthenticated
+        isAuthenticated: req.session.isLoggedIn
       });
     })
   .catch(err => console.log(err));
@@ -65,7 +65,7 @@ exports.postCart = (req, res, next) => {
   const prodId = req.body.productId;
   Product.findById(prodId)
   .then(product => {
-    return req.user.addToCart(product);
+    return req.session.user.addToCart(product);
     })
   .then(result => {
     res.redirect('/cart');
@@ -76,7 +76,7 @@ exports.postCart = (req, res, next) => {
 
 exports.postCartDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
-  req.user.deleteCartProduct(prodId)
+  req.session.user.deleteCartProduct(prodId)
     .then(result => {
       res.redirect('/cart');
     })
@@ -88,7 +88,7 @@ exports.postOrder = (req, res, next) => {
   // the second one is users (that is also an object with all the user details).
   
   //Fetching the product details
-  const prod = req.user.populate('cart.items.productId')
+  const prod = req.session.user.populate('cart.items.productId')
   .then(user => {
     const products = user.cart.items.map(i => {
       return{
@@ -98,15 +98,15 @@ exports.postOrder = (req, res, next) => {
     });
     const order = new Order({
       user: {
-        name: req.user.name,
-        userId: req.user
+        name: req.session.user.name,
+        userId: req.session.user
       },
       products: products
     });
     order.save();
   }).
   then(result => {
-   return req.user.clearCart();
+   return req.session.user.clearCart();
   })
   .then(() => {
     res.redirect('/orders');
@@ -123,7 +123,7 @@ exports.getOrders = (req, res, next) => {
         path: '/orders',
         pageTitle: 'Your Orders',
         orders: orders,
-        isAuthenticated: req.isAuthenticated
+        isAuthenticated: req.session.isLoggedIn
       });
     })
     .catch(err => console.log(err));
