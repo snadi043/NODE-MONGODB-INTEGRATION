@@ -23,6 +23,13 @@ exports.postLogin = (req, res, next) => {
     .catch(err => console.log(err));
 }
 
+// Destroying the session after the user clicks on logout button in the navigation in a clean way.
+exports.postLogout = (req, res, next) => {
+    req.session.destroy(() => {
+        res.redirect('/');
+    })
+}
+
 // When storing the value like in line 12 to use it to help during the handling of HTTP request it is not stored and helpful for every single request because once the request is processed it is ended there and everytime 
 // a new request is made in between the server and the client this value doesnt persist. So, it doesnot help to handle the user requirements to navigate the user based on their loggedIn status. So, the alternative to this is COOKIE.
 
