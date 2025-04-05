@@ -18,7 +18,10 @@ exports.postLogin = (req, res, next) => {
     .then(user => {
         req.session.isLoggedIn = true;
         req.session.user = user;
-        res.redirect('/');
+        req.session.save((err) => { // adding save() method on the session to render the coorect view when fetching the sessions from the database. 
+            console.log(err);
+            res.redirect('/');
+        })
     })
     .catch(err => console.log(err));
 }

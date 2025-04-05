@@ -31,6 +31,21 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({secret: 'this is the most secret property to be set inorder to attain high security', saveUninitialized: false, resave: false, store: store}));
 
+// Implementing the below middleware function in order to avoid the errors for the missing functionality of mongoose magic methods by the express-session.
+// Because, the express-session is not aware of getting the mongoose provided methods along with the session information from the database. 
+app.use(req, res, next => {
+  if(!req.session.user){
+    return next();
+  }
+  User.findById(req.session.user._id).then(
+    user => {
+      req.user = user;
+    }
+  ).catch(err => {
+    console.log(err);
+  });
+});
+
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);

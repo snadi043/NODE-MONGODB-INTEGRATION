@@ -46,7 +46,7 @@ exports.getIndex = (req, res, next) => {
 };
 
 exports.getCart = (req, res, next) => {
-  req.session.user
+  req.user
   .populate('cart.items.productId') // populate() is the mongoose provided method which gets all the fields from the collection that is specified in the method.
   // .execPopulate()
     .then(user => {
@@ -65,7 +65,7 @@ exports.postCart = (req, res, next) => {
   const prodId = req.body.productId;
   Product.findById(prodId)
   .then(product => {
-    return req.session.user.addToCart(product);
+    return req.user.addToCart(product);
     })
   .then(result => {
     res.redirect('/cart');
@@ -76,7 +76,7 @@ exports.postCart = (req, res, next) => {
 
 exports.postCartDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
-  req.session.user.deleteCartProduct(prodId)
+  req.user.deleteCartProduct(prodId)
     .then(result => {
       res.redirect('/cart');
     })
@@ -88,7 +88,7 @@ exports.postOrder = (req, res, next) => {
   // the second one is users (that is also an object with all the user details).
   
   //Fetching the product details
-  const prod = req.session.user.populate('cart.items.productId')
+  const prod = req.user.populate('cart.items.productId')
   .then(user => {
     const products = user.cart.items.map(i => {
       return{
@@ -98,15 +98,15 @@ exports.postOrder = (req, res, next) => {
     });
     const order = new Order({
       user: {
-        name: req.session.user.name,
-        userId: req.session.user
+        name: req.user.name,
+        userId: req.user
       },
       products: products
     });
     order.save();
   }).
   then(result => {
-   return req.session.user.clearCart();
+   return req.user.clearCart();
   })
   .then(() => {
     res.redirect('/orders');
