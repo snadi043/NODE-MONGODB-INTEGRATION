@@ -11,24 +11,38 @@ exports.getLogin = (req, res, next) => {
 }
 
 exports.postLogin = (req, res, next) => {
+    const email = req.body.email;
+    const password = req.body.password;
     // // While handling the action that is after login button is clicked, we plan to pass the isAuthenticated value through the request to display the reamining two routes conditionally.
     // req.isAuthenticated = true; 
     // res.setHeader('Set-Cookie', 'isLoggedIn=true');
-    User.findById('67e2bad2ede014c342373de4') // Fetching the user after logging in and storing the user value in the session.
+    User.findOne({email: email}) // Fetching the user after logging in and storing the user value in the session.
     .then(user => {
-        req.session.isLoggedIn = true;
-        req.session.user = user;
-        req.session.save((err) => { // adding save() method on the session to render the coorect view when fetching the sessions from the database. 
+        if(!user){
+            return res.redirect('/login');
+        }
+        bcrypt.compare(password, user.password) // compare() does throw error if something goes wrong the hash/encryption process. It doesnot check if the passwords are of same length. same charectors etc.
+        .then(doMatch => {
+            if(doMatch){
+                req.session.isLoggedIn = true; // After, the passwords are matched the session is created to store the cookie to provide authentication of the user.
+                req.session.user = user;
+                return req.session.save((err) => { // adding save() method on the session to render the coorect view when fetching the sessions from the database. 
+                    console.log(err);
+                    res.redirect('/');
+                });
+            }
+            res.redirect('/login');
+        }).catch(err => {
             console.log(err);
-            res.redirect('/');
-        })
+            res.redirect('/login');
+        });
     })
     .catch(err => console.log(err));
 }
-
 // Destroying the session after the user clicks on logout button in the navigation in a clean way.
 exports.postLogout = (req, res, next) => {
-    req.session.destroy(() => {
+    req.session.destroy(err => {
+        console.log(err);
         res.redirect('/');
     })
 }

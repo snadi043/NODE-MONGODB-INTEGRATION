@@ -18,12 +18,12 @@ exports.getSignUpPage = (req, res, next) => {
 // navigation -> clicked on "Signup" button.
 exports.postSignUpPage = (req, res, next) => {
     // Collecting the user details like email and password.
-    const email = req.body.Email;
-    const password = req.body.Password;
+    const email = req.body.email;
+    const password = req.body.password;
     // Checking if the user already exists in the database. if yes -> redirect to singup page.
     User.findOne({email: email}).then(user => { // 
         if(user){
-            return res.redirect('/singup');
+            return res.redirect('/signup');
         }
     // If not an existing user -> before creating a new user the password is hashed for security and then creating a new user with the User model.
         return bcrypt.hash(password, 12).then(hasedPassword => {
