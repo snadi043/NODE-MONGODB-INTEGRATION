@@ -62,18 +62,18 @@ app.use(errorController.get404);
 // Connecting the mongoose package to the mongoDb to make use of ODM(Object Document Mapping) concept.
 // This bascially takes care of all the heavy lifting behind the scenes to create the collections & documents to store the data.
 mongoose.connect(MONGODB_URI).then(result => {
-  User.findOne().then(user => {
-    if(!user){
-      const user = new User({
-        name: 'Sai',
-        email: 'sai@test.com',
-        cart: {
-          items: []
-        },
-      });
-      user.save();
-    }
-  });
+  // User.findOne().then(user => {
+  //   if(!user){
+  //     const user = new User({
+  //       name: 'Sai',
+  //       email: 'sai@test.com',
+  //       cart: {
+  //         items: []
+  //       },
+  //     });
+  //     user.save();
+  //   }
+  // });
   app.listen(3000);
 })
 .catch(err => {
