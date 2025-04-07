@@ -23,6 +23,7 @@ app.set('views', 'views');
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 const authRoutes = require('./routes/auth');
+const signupRoutes = require('./routes/signup');
 
 const MONGODB_URI = 'mongodb+srv://NodeMongo:node-mongo-integration@node-mongo-integration.025ge.mongodb.net/shop?w=majority&appName=Node-Mongo-Integration';
 const store = new mongodbSessionStore({uri: MONGODB_URI, collection: 'sessions'});
@@ -49,6 +50,7 @@ app.use((req, res, next) => {
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);
+app.use(signupRoutes);
 
 app.use(errorController.get404);
 
