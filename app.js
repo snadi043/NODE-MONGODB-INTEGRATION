@@ -2,9 +2,14 @@ const path = require('path');
 
 const express = require('express');
 const bodyParser = require('body-parser');
-const mongoose = require('mongoose');
+
 const session = require('express-session');
+
+const mongoose = require('mongoose');
 const MongoDBStore = require('connect-mongodb-session')(session);
+
+
+const csrf = require('csurf');
 
 const errorController = require('./controllers/error');
 const User = require('./models/user');
@@ -12,7 +17,10 @@ const User = require('./models/user');
 // 
 const MONGODB_URI = 'mongodb+srv://NodeMongo:node-mongo-integration@node-mongo-integration.025ge.mongodb.net/shop?w=majority&appName=Node-Mongo-Integration';
 
+const csrfToken = csrf(); // Initializing the CSRF token to use in the application.
+
 const app = express();
+
 const store = new MongoDBStore({
   uri: MONGODB_URI,
   collection: 'session'
@@ -28,14 +36,23 @@ const signupRoutes = require('./routes/signup');
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(
-  session({
-    secret: 'my secret',
-    resave: false,
-    saveUninitialized: false,
-    store: store
-  })
-);
+
+app.use(require('express-session')({
+  secret: 'my secret',
+  store: store,
+  resave: false,
+  saveUninitialized: false,
+}));
+
+app.use(csrfToken);
+
+// Middleware function to use the properties in all the views to implement them in the 
+// format of "locals" which has the centralized memory to access and use them in the application.
+app.use((req, res, next) => {
+  res.locals.csrfToken = req.csrfToken();
+  res.locals.isAuthenticated = req.session.isLoggedIn;
+  next();
+});
 
 app.use((req, res, next) => {
   if (!req.session.user) {
@@ -65,6 +82,15 @@ mongoose
     console.log(err);
   });
 
+
+  // CSRF -> CSRF stands for Cross Site Request Frogery.
+  // CSRF is an attack made by the hackers to inject malicious code into the application and tricking the users of the application to perform sensitive information related actions.
+  // Scenario: A user is logged in into the application who has valid session and cookie accessing the application, is directed to use a similar looking view (which is not the actual authorized view) to then fill a form or do a payment.
+  // This can also happen in a way where an email with a link is sent asking to navigate to the link to perform verification then redirects to similar looking view and manipulates to perform sensitive actions.
+  // But, how is this flow working, Because the user has a valid session and that session has access to the server which makes it accessible to handle the above mentioned flow.
+  // To overcome this scenario and avoid such attacks happening with your site, the work around is to implement the CSRF Token in the views of the application.
+  // CSRF tokens function in a way where a hashed token is set on the neccessary HTTP request and is mapped with the related to view to make that view as a secure page to render for the users.
+  // The package used to implement this flow is "CSURF". This package does not render the views which are not holding the token when handled through the POST HTTP methods.
 
 // const path = require('path');
 
