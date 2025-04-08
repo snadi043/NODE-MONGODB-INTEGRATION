@@ -3,10 +3,18 @@ const User = require('../models/user');
 // Controller for the Login functionality to handle all the related requests for the authentication in the application.
  
 exports.getLogin = (req, res, next) => {
+    let message = req.flash('error');
+    if(message.length > 0){
+        message = message[0];
+    }
+    else{
+        message = null;
+    }
     res.render('auth/login', {
         path: '/login',
         pageTitle: 'Login',
         isAuthenticated: false,
+        errorMessage: message,
     });
 }
 
@@ -19,6 +27,7 @@ exports.postLogin = (req, res, next) => {
     User.findOne({email: email}) // Fetching the user after logging in and storing the user value in the session.
     .then(user => {
         if(!user){
+            req.flash('error', 'Invalid email or password');
             return res.redirect('/login');
         }
         bcrypt.compare(password, user.password) // compare() does throw error if something goes wrong the hash/encryption process. It doesnot check if the passwords are of same length. same charectors etc.
@@ -31,6 +40,7 @@ exports.postLogin = (req, res, next) => {
                     res.redirect('/');
                 });
             }
+            req.flash('error', 'Invalid email or password');
             res.redirect('/login');
         }).catch(err => {
             console.log(err);

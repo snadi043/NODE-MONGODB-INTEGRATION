@@ -7,10 +7,18 @@ const bcrypt = require('bcryptjs');
 // getSignUpPage() is the middleware function to handle the GET request to respond when user tries to singup to the applicaton.
 // navigation -> clicked on "Signup" in the menu to redirect to view "signup" page.
 exports.getSignUpPage = (req, res, next) => {
+    let message = req.flash('error');
+        if(message > 0){
+            message = message[0];
+        }
+        else{
+            message = null;
+        }
     res.render('auth/signup', {
         path: '/signup',
         pageTitle: 'SignUp',
-        isAuthenticated: false
+        isAuthenticated: false,
+        errorMessage: message,
     });
 }
 
@@ -21,8 +29,9 @@ exports.postSignUpPage = (req, res, next) => {
     const email = req.body.email;
     const password = req.body.password;
     // Checking if the user already exists in the database. if yes -> redirect to singup page.
-    User.findOne({email: email}).then(user => { // 
+    User.findOne({email: email}).then(user => {
         if(user){
+            req.flash('error', 'E-mail already exists, Please try with a new email');
             return res.redirect('/signup');
         }
     // If not an existing user -> before creating a new user the password is hashed for security and then creating a new user with the User model.

@@ -8,8 +8,9 @@ const session = require('express-session');
 const mongoose = require('mongoose');
 const MongoDBStore = require('connect-mongodb-session')(session);
 
-
 const csrf = require('csurf');
+
+const flash = require('connect-flash');
 
 const errorController = require('./controllers/error');
 const User = require('./models/user');
@@ -45,6 +46,8 @@ app.use(require('express-session')({
 }));
 
 app.use(csrfToken);
+
+app.use(flash());
 
 // Middleware function to use the properties in all the views to implement them in the 
 // format of "locals" which has the centralized memory to access and use them in the application.
