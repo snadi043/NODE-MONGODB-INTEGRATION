@@ -18,7 +18,7 @@ const ordersSchema = new Schema({
       type: mongoose.Schema.ObjectId,
       required: true,
     },
-    name:{
+    email:{
       type: String,
       required: true,
     }
