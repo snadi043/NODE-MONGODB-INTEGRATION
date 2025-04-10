@@ -8,7 +8,7 @@ const nodemailer = require('nodemailer');
 const nodemailertransporter = require('nodemailer-sendgrid-transport');
 
 const mailTransport = nodemailer.createTransport(nodemailertransporter({
-    api_key: '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',
+    api_key: '',
 }));
 
 // getSignUpPage() is the middleware function to handle the GET request to respond when user tries to singup to the applicaton.
