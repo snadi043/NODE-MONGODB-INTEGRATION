@@ -4,6 +4,13 @@
 const User = require('../models/user');
 const bcrypt = require('bcryptjs');
 
+const nodemailer = require('nodemailer');
+const nodemailertransporter = require('nodemailer-sendgrid-transport');
+
+const mailTransport = nodemailer.createTransport(nodemailertransporter({
+    api_key: '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',
+}));
+
 // getSignUpPage() is the middleware function to handle the GET request to respond when user tries to singup to the applicaton.
 // navigation -> clicked on "Signup" in the menu to redirect to view "signup" page.
 exports.getSignUpPage = (req, res, next) => {
