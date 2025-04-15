@@ -149,6 +149,7 @@ exports.getNewPassword = (req, res, next) => {
             pageTitle: 'New Password',
             errorMessage: message,
             userId: user._id.toString(),
+            generativeToken: generativeToken,
         });
     })
     .catch(err => {
@@ -161,22 +162,25 @@ exports.getNewPassword = (req, res, next) => {
 // navigation -> clicked on "Login" in the menu -> Click on the "Reset Password" link -> redirect to view "reset" page -> "UPDATE PASSWORD".
 exports.postNewPassword = (req, res, next) => {
     const newPassword = req.body.password;
-    const token =  req.params.token;
-    const userId = req.body.user._id;
+    const token =  req.body.generativeToken;
+    const userId = req.body.userId;
     let updatedUser;
-    User.findOne({user_id: userId, token: token, resetTokenExpiry: {$gt: Date.now()} }).then(
+    User.findOne({_id: userId, resetToken: token, resetTokenExpiry: {$gt: Date.now()} })
+    .then(
         user => {
-            updatedUser = user,
-            updatedUser.password = bcrypt.hash(12).then(hashedPassword => {
-                newPassword = hashedPassword;
-                resetToken = undefined;
-                resetTokenExpiry = undefined;
+            updatedUser = user;
+            return bcrypt.hash(newPassword, 12);
+        })
+        .then(hashedPassword => {
+            updatedUser.password = hashedPassword;
+            updatedUser.resetToken = undefined;
+            updatedUser.resetTokenExpiry = undefined;
             return updatedUser.save();
-            }).then(result => {
-                res.redirect('/login');
-            });
-        }
-    ).catch(err => {
+        })
+        .then(result => {
+            res.redirect('/login');
+        })
+        .catch(err => {
         console.log(err);
     });
 }
