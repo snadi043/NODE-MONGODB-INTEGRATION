@@ -11,7 +11,7 @@ const nodemailertransporter = require('nodemailer-sendgrid-transport');
 
 const mailTransport = nodemailer.createTransport(nodemailertransporter({
     auth: {
-        api_user: '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',
+        api_user: ''
     }
 }));
 
@@ -57,7 +57,7 @@ exports.postSignUpPage = (req, res, next) => {
                 res.redirect('/login');
                 return mailTransport.sendMail({
                     to: email,
-                    from: 'nodemailerservices@test.com',
+                    from: 'snadi043@uottawa.ca',
                     html: '<h1>You are signup succedded!</h1>',
                     subject: 'You are successfully signed up',
                     text: 'Success'
@@ -112,7 +112,7 @@ exports.postResetPage = (req, res, next) => {
         .then(result => {
             res.redirect('/');
             return mailTransport.sendMail({
-                from: 'nodemailerservices@test.com',
+                from: 'snadi043@uottawa.ca',
                 to: req.body.email,
                 html: `
                 <p>You have requested for a password reset.</p>
