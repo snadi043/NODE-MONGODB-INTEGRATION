@@ -111,7 +111,7 @@ exports.postResetPage = (req, res, next) => {
         // Once the updated information is saved, then sending the email by configuring the sendgrid mail service system and fill the required information.
         .then(result => {
             res.redirect('/');
-            mailTransport.sendMail({
+            return mailTransport.sendMail({
                 from: 'nodemailerservices@test.com',
                 to: req.body.email,
                 html: `
@@ -120,9 +120,47 @@ exports.postResetPage = (req, res, next) => {
                 `,
                 subject: 'Password Reset Verification',
             });
+        })
+        .catch(err => {
+            console.log(err);
         });
+    });
+}
+
+exports.getNewPassword = (req, res, next) => {
+    let message = req.flash('error');
+    if(message.length > 0){
+        message = message[0];
     }
+    else{
+        message = null;
+    }
+    res.render('/auth/new-password', {
+        path: '/new-passsword',
+        pageTitle: 'New Password',
+        errorMessage: message,
+
+    });
+}
+
+exports.postNewPassword = (req, res, next) => {
+    const newPassword = req.body.password;
+    const token =  req.params.token;
+    const userId = req.body.user._id;
+    let updatedUser;
+    User.findOne({user_id: userId, token: token, resetTokenExpiry: $gt }).then(
+        user => {
+            updatedUser = user,
+            updatedUser.password = bcrypt.hash(12).then(hashedPassword => {
+                newPassword = hashedPassword;
+                resetToken = undefined;
+                resetTokenExpiry = undefined;
+            return updatedUser.save();
+            }).then(result => {
+                res.redirect('/login');
+            });
+        }
     ).catch(err => {
         console.log(err);
     });
-    }
+}
