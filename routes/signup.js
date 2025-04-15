@@ -17,9 +17,9 @@ router.get('/reset', signUpController.getResetPage);
 router.post('/reset', signUpController.postResetPage);
 
 // GET -> HTTP GET method to handle the "NEW PASSWORD" request from the navigation menu -> RESET PAGE "SEND VERIFICATION LINK" button in the app.
-router.get('/new-password', signUpController.getNewPassword);
+router.get('/reset/:token', signUpController.getNewPassword);
 
 // POST -> HTTP POST method to handle the "NEW PASSWORD" request from the navigation menu -> RESET PAGE "SEND VERIFICATION LINK" button in the app.
-router.post('/new-password/:token', signUpController.postNewPassword);
+router.post('/new-password/', signUpController.postNewPassword);
 
 module.exports = router;
