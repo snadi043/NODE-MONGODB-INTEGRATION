@@ -1,4 +1,5 @@
 const User = require('../models/user');
+const bcrypt = require('bcryptjs');
 
 // Controller for the Login functionality to handle all the related requests for the authentication in the application.
  
