@@ -161,16 +161,19 @@ exports.getNewPassword = (req, res, next) => {
 // postNewPassword() is the middleware function to handle the POST request to respond when user tries to update their password after clicking on reset link on the login page of the applicaton.
 // navigation -> clicked on "Login" in the menu -> Click on the "Reset Password" link -> redirect to view "reset" page -> "UPDATE PASSWORD".
 exports.postNewPassword = (req, res, next) => {
+    // Extracting the required value of the properties inorder to implement the verification of the user.
     const newPassword = req.body.password;
     const token =  req.body.generativeToken;
     const userId = req.body.userId;
     let updatedUser;
     User.findOne({_id: userId, resetToken: token, resetTokenExpiry: {$gt: Date.now()} })
+    // After finding the particular user with validation check approved updating the password again with the bcrypt hash mechanism.
     .then(
         user => {
             updatedUser = user;
             return bcrypt.hash(newPassword, 12);
         })
+        // Saving the updated fields back into the database using the user model.
         .then(hashedPassword => {
             updatedUser.password = hashedPassword;
             updatedUser.resetToken = undefined;

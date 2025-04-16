@@ -35,7 +35,7 @@ exports.getEditProduct = (req, res, next) => {
     return res.redirect('/');
   }
   const prodId = req.params.productId;
-  Product.findById(prodId)
+  Product.findById({_id:prodId, userId: req.user_id})
     .then(product => {
       if (!product) {
         return res.redirect('/');
@@ -58,23 +58,27 @@ exports.postEditProduct = (req, res, next) => {
   const updatedPrice = req.body.price;
   const updatedImageUrl = req.body.imageUrl;
   const updatedDesc = req.body.description;
+  // Adding the filter to check for the right user with admin access only to edit the products he/she is created.
   Product.findById(prodId).then(product => {
+    if(product.userId.toString() !== req.user._id.toString()){
+      return res.redirect('/');
+    }
     product.title = updatedTitle;
     product.price = updatedPrice;
     product.imageUrl = updatedImageUrl;
     product.description = updatedDesc;
     return product.save()
+    .then(result => {
+      console.log('UPDATED PRODUCT!');
+      res.redirect('/admin/products');
+    })
+    .catch(err => console.log(err));
   }
-)
-  .then(result => {
-    console.log('UPDATED PRODUCT!');
-    res.redirect('/admin/products');
-  })
-  .catch(err => console.log(err));
-};
+)};
 
 exports.getProducts = (req, res, next) => {
-  Product.find()
+  // Adding the filter check to provide access only the user who is an admin and who has created the product to see only the products he/she added and displaying only his/her products under his account login.
+  Product.find({userId: req.user._id})
   // .select('title price -_id') // select() -> It is a mongoose provided method which can help to fetch only the mentioned fields from the document also has the provision to leave the fields which are unnecessary.
   // .populate('userId', 'name') // populate() -> It is a mongoose provided method which is used to fetch the fields from the collection.
     .then(products => {
@@ -91,7 +95,8 @@ exports.getProducts = (req, res, next) => {
 // navigation -> clicked on "Admin Products" in the menu to redirect to view "products" -> clicked on "DELETE" button ->  deleted it in the database.
 exports.postDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
-  Product.findByIdAndDelete(prodId)
+  // Adding the filter to allow the access to the user to delete the product if he/she has proper userId and he/she only added that same product which he/she is trying to delete. 
+  Product.deleteOne({_id : prodId, userId: req.user._id})
     .then(() => {
       console.log('DESTROYED PRODUCT');
       res.redirect('/admin/products');
