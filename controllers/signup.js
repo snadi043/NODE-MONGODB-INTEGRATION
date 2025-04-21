@@ -36,7 +36,8 @@ exports.getSignUpPage = (req, res, next) => {
             email: '',
             password: '',
             cpassword: ''
-        }
+        },
+        validationErrorsArray: [],
     });
 }
 
@@ -49,6 +50,7 @@ exports.postSignUpPage = (req, res, next) => {
     const cpassword = req.body.cpassword;
 
     const errors = validationResult(req);
+    console.log(errors.array());
     if(!errors.isEmpty()){
         return res.status(422).render('auth/signup', {
             path: '/signup',
@@ -59,7 +61,8 @@ exports.postSignUpPage = (req, res, next) => {
                 email: email,
                 password: password,
                 cpassword: req.body.cpassword
-            }
+            },
+            validationErrorsArray: errors.array()
         });
     }
     // Checking if the user already exists in the database. if yes -> redirect to singup page.

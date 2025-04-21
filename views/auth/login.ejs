@@ -12,11 +12,23 @@
         <form class="login-form" action="/login" method="POST" novalidate>
             <div class="form-control">
                 <label for="email">Email</label>
-                <input type="email" name="email" id="email" value="<%= oldInputs.email %>"/>
+                <input
+                    class="<%= errorArray.find(e => e.path === 'email') ? 'invalid' : '' %>"
+                    type="email" 
+                    name="email" 
+                    id="email" 
+                    value="<%= oldInputs.email %>"
+                    />
             </div>
             <div class="form-control">
                 <label for="Password">Password</label>
-                <input type="password" name="password" id="password" value="<%= oldInputs.password %>"/>
+                <input
+                    class="<%= errorArray.find(e => e.path === 'password') ? 'invalid' : '' %>"
+                    type="password" 
+                    name="password" 
+                    id="password" 
+                    value="<%= oldInputs.password %>"
+                    />
             </div>
             <div class="centered">
                 <a href="/reset">Reset Password</a>
