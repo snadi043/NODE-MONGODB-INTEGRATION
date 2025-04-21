@@ -45,7 +45,7 @@ exports.postSignUpPage = (req, res, next) => {
             path: '/signup',
             pageTitle: 'SignUp',
             isAuthenticated: false,
-            errorMessage: errors.array()[0].msg,
+            errorMessage: errors.array().msg,
         });
     }
     // Collecting the user details like email and password.

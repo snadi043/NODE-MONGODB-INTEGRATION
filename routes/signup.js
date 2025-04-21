@@ -10,7 +10,18 @@ const router = express.Router();
 router.get('/signup', signUpController.getSignUpPage);
 
 // POST -> HTTP POST method to handle the SignUp request from the navigation menu in the app.
-router.post('/signup', query('email').isEmail().withMessage('Please enter a valid email.'), signUpController.postSignUpPage);
+router.post('/signup', 
+    [
+        query('email').isEmail().withMessage('Please enter a valid email.'),
+        query('password', 'Please enter a password with atleast 6 charecters including letters and numbers.').isAlphanumeric().isLength({min: 6}),
+        query('cpassword').custom((value, {req}) => {
+            if(value !== req.body.password){
+                throw new Error('Passwords should match. Please enter passwords correctly again.');
+            }
+            return true;
+        }),
+    ],
+    signUpController.postSignUpPage);
 
 // GET -> HTTP GET method to handle the "PASSWORD RESET" request from the navigation menu -> LOGIN PAGE "RESET PASSWORD" link in the app.
 router.get('/reset', signUpController.getResetPage);
