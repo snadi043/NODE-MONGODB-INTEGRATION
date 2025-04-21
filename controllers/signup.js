@@ -38,19 +38,21 @@ exports.getSignUpPage = (req, res, next) => {
 // postSignUpPage() is the middleware function to handle the POST request to respond when user clicked on "singup" button in the Signup page.
 // navigation -> clicked on "Signup" button.
 exports.postSignUpPage = (req, res, next) => {
-    const errors = validationResult(req);
-    // console.log(errors.array());
-    if(!errors.isEmpty()){
-        return res.render('auth/signup', {
-            path: '/signup',
-            pageTitle: 'SignUp',
-            isAuthenticated: false,
-            errorMessage: errors.array().msg,
-        });
-    }
     // Collecting the user details like email and password.
     const email = req.body.email;
     const password = req.body.password;
+    const cpassword = req.body.cpassword;
+
+    const errors = validationResult(req);
+    console.log(errors.array());
+    if(!errors.isEmpty()){
+        return res.status(422).render('auth/signup', {
+            path: '/signup',
+            pageTitle: 'SignUp',
+            isAuthenticated: false,
+            errorMessage: errors.array()[0].msg,
+        });
+    }
     // Checking if the user already exists in the database. if yes -> redirect to singup page.
     User.findOne({email: email}).then(user => {
         if(user){

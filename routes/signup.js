@@ -1,6 +1,6 @@
 const express = require('express');
 
-const {query} = require('express-validator'); // Importing the express validator package to integrate the validation into the application.
+const {query, body} = require('express-validator'); // Importing the express validator package to integrate the validation into the application.
 
 const signUpController = require('../controllers/signup');
 
@@ -12,9 +12,20 @@ router.get('/signup', signUpController.getSignUpPage);
 // POST -> HTTP POST method to handle the SignUp request from the navigation menu in the app.
 router.post('/signup', 
     [
-        query('email').isEmail().withMessage('Please enter a valid email.'),
-        query('password', 'Please enter a password with atleast 6 charecters including letters and numbers.').isAlphanumeric().isLength({min: 6}),
-        query('cpassword').custom((value, {req}) => {
+        query('email')
+        .isEmail()
+        .withMessage('Please enter a valid email.'),
+        // .custom((value, { req }) => {
+        //     if (value === 'test@test.com') {
+        //       throw new Error('This email address if forbidden.');
+        //     }
+        //     return true;
+        //   }),
+        body('password', 'Please enter a password with atleast 6 charecters including letters and numbers.')
+        .isLength({min: 6})
+        .isAlphanumeric(),
+        body('cpassword')
+        .custom((value, {req}) => {
             if(value !== req.body.password){
                 throw new Error('Passwords should match. Please enter passwords correctly again.');
             }
