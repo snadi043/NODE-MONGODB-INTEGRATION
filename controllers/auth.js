@@ -18,6 +18,10 @@ exports.getLogin = (req, res, next) => {
         pageTitle: 'Login',
         isAuthenticated: false,
         errorMessage: message,
+        oldInputs: {
+            email: '',
+            password: ''
+        }
     });
 }
 
@@ -32,6 +36,7 @@ exports.postLogin = (req, res, next) => {
             pageTitle: 'Login',
             isAuthenticated: false,
             errorMessage: expressValidator.array()[0].msg,
+            oldInputs: {email: email, password: password}
         });
     }
     // // While handling the action that is after login button is clicked, we plan to pass the isAuthenticated value through the request to display the reamining two routes conditionally.

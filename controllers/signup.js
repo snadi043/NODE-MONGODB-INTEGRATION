@@ -32,6 +32,11 @@ exports.getSignUpPage = (req, res, next) => {
         pageTitle: 'SignUp',
         isAuthenticated: false,
         errorMessage: message,
+        oldInputs: {
+            email: '',
+            password: '',
+            cpassword: ''
+        }
     });
 }
 
@@ -50,6 +55,11 @@ exports.postSignUpPage = (req, res, next) => {
             pageTitle: 'SignUp',
             isAuthenticated: false,
             errorMessage: errors.array()[0].msg,
+            oldInputs: {
+                email: email,
+                password: password,
+                cpassword: req.body.cpassword
+            }
         });
     }
     // Checking if the user already exists in the database. if yes -> redirect to singup page.
