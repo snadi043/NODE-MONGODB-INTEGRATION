@@ -4,6 +4,8 @@
 const User = require('../models/user');
 const bcrypt = require('bcryptjs');
 
+const { validationResult } = require('express-validator'); // Enabling the validationResult property to register the error and dispaly it in the view through the controller.
+
 const crypto = require('crypto'); // Crypto is the in-built nodejs provided package to create a secure tokens to be used in the application.
 
 const nodemailer = require('nodemailer');
@@ -36,6 +38,16 @@ exports.getSignUpPage = (req, res, next) => {
 // postSignUpPage() is the middleware function to handle the POST request to respond when user clicked on "singup" button in the Signup page.
 // navigation -> clicked on "Signup" button.
 exports.postSignUpPage = (req, res, next) => {
+    const errors = validationResult(req);
+    // console.log(errors.array());
+    if(!errors.isEmpty()){
+        return res.render('auth/signup', {
+            path: '/signup',
+            pageTitle: 'SignUp',
+            isAuthenticated: false,
+            errorMessage: errors.array()[0].msg,
+        });
+    }
     // Collecting the user details like email and password.
     const email = req.body.email;
     const password = req.body.password;

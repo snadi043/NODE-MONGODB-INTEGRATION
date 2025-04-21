@@ -1,5 +1,7 @@
 const express = require('express');
 
+const {query} = require('express-validator'); // Importing the express validator package to integrate the validation into the application.
+
 const signUpController = require('../controllers/signup');
 
 const router = express.Router();
@@ -8,7 +10,7 @@ const router = express.Router();
 router.get('/signup', signUpController.getSignUpPage);
 
 // POST -> HTTP POST method to handle the SignUp request from the navigation menu in the app.
-router.post('/signup', signUpController.postSignUpPage);
+router.post('/signup', query('email').isEmail().withMessage('Please enter a valid email.'), signUpController.postSignUpPage);
 
 // GET -> HTTP GET method to handle the "PASSWORD RESET" request from the navigation menu -> LOGIN PAGE "RESET PASSWORD" link in the app.
 router.get('/reset', signUpController.getResetPage);
