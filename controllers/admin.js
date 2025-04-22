@@ -109,7 +109,7 @@ exports.postEditProduct = (req, res, next) => {
         imageUrl: updatedImageUrl,
         price: updatedPrice,
         description: updatedDesc,
-        // prod_Id: prodId 
+        _id: prodId
       },
       errorFields: {
         title: updatedTitle,
