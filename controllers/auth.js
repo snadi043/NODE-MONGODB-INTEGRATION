@@ -1,6 +1,8 @@
 const User = require('../models/user');
 const bcrypt = require('bcryptjs');
 
+const { validationResult } = require('express-validator');
+
 // Controller for the Login functionality to handle all the related requests for the authentication in the application.
  
 exports.getLogin = (req, res, next) => {
@@ -16,12 +18,29 @@ exports.getLogin = (req, res, next) => {
         pageTitle: 'Login',
         isAuthenticated: false,
         errorMessage: message,
+        oldInputs: {
+            email: '',
+            password: ''
+        },
+        errorArray: [],
     });
 }
 
 exports.postLogin = (req, res, next) => {
     const email = req.body.email;
     const password = req.body.password;
+    const expressValidator = validationResult(req);
+    if(!expressValidator.isEmpty()){
+        // console.log(expressValidator.array(0));
+        return res.status(422).render('auth/login', {
+            path: '/login',
+            pageTitle: 'Login',
+            isAuthenticated: false,
+            errorMessage: expressValidator.array()[0].msg,
+            oldInputs: {email: email, password: password},
+            errorArray: expressValidator.array(),
+        });
+    }
     // // While handling the action that is after login button is clicked, we plan to pass the isAuthenticated value through the request to display the reamining two routes conditionally.
     // req.isAuthenticated = true; 
     // res.setHeader('Set-Cookie', 'isLoggedIn=true');

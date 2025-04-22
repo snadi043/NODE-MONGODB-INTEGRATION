@@ -1,6 +1,10 @@
 const express = require('express');
 
+const {body} = require('express-validator'); // Importing the express validator package to integrate the validation into the application.
+
 const signUpController = require('../controllers/signup');
+
+const User = require('../models/user');
 
 const router = express.Router();
 
@@ -8,7 +12,36 @@ const router = express.Router();
 router.get('/signup', signUpController.getSignUpPage);
 
 // POST -> HTTP POST method to handle the SignUp request from the navigation menu in the app.
-router.post('/signup', signUpController.postSignUpPage);
+router.post('/signup', 
+    [
+        body('email')
+        .isEmail()
+        .withMessage('Please enter a valid email.')
+        .custom((value, { req }) => {
+            // console.log(value);
+        //     if (value === 'test@test.com') {
+        //       throw new Error('This email address if forbidden.');
+        //     }
+        //     return true;
+        return User.findOne({email: value}).then(user => {
+            if(user){
+                return Promise.reject('E-mail already exists, Please try with a new email');
+                    }
+                });
+            },
+        ),
+        body('password', 'Please enter a password with atleast 6 charecters including letters and numbers.')
+        .isLength({min: 6})
+        .isAlphanumeric(),
+        body('cpassword')
+        .custom((value, {req}) => {
+            if(value !== req.body.password){
+                throw new Error('Passwords should match. Please enter passwords correctly again.');
+            }
+            return true;
+        }),
+    ],
+    signUpController.postSignUpPage);
 
 // GET -> HTTP GET method to handle the "PASSWORD RESET" request from the navigation menu -> LOGIN PAGE "RESET PASSWORD" link in the app.
 router.get('/reset', signUpController.getResetPage);

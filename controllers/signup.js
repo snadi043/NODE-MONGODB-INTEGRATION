@@ -4,6 +4,8 @@
 const User = require('../models/user');
 const bcrypt = require('bcryptjs');
 
+const { validationResult } = require('express-validator'); // Enabling the validationResult property to register the error and dispaly it in the view through the controller.
+
 const crypto = require('crypto'); // Crypto is the in-built nodejs provided package to create a secure tokens to be used in the application.
 
 const nodemailer = require('nodemailer');
@@ -30,6 +32,12 @@ exports.getSignUpPage = (req, res, next) => {
         pageTitle: 'SignUp',
         isAuthenticated: false,
         errorMessage: message,
+        oldInputs: {
+            email: '',
+            password: '',
+            cpassword: ''
+        },
+        validationErrorsArray: [],
     });
 }
 
@@ -39,14 +47,32 @@ exports.postSignUpPage = (req, res, next) => {
     // Collecting the user details like email and password.
     const email = req.body.email;
     const password = req.body.password;
+    const cpassword = req.body.cpassword;
+
+    const errors = validationResult(req);
+    console.log(errors.array());
+    if(!errors.isEmpty()){
+        return res.status(422).render('auth/signup', {
+            path: '/signup',
+            pageTitle: 'SignUp',
+            isAuthenticated: false,
+            errorMessage: errors.array()[0].msg,
+            oldInputs: {
+                email: email,
+                password: password,
+                cpassword: req.body.cpassword
+            },
+            validationErrorsArray: errors.array()
+        });
+    }
     // Checking if the user already exists in the database. if yes -> redirect to singup page.
-    User.findOne({email: email}).then(user => {
-        if(user){
-            req.flash('error', 'E-mail already exists, Please try with a new email');
-            return res.redirect('/signup');
-        }
+    // User.findOne({email: email}).then(user => {
+    //     if(user){
+    //         req.flash('error', 'E-mail already exists, Please try with a new email');
+    //         return res.redirect('/signup');
+    //     }
     // If not an existing user -> before creating a new user the password is hashed for security and then creating a new user with the User model.
-        return bcrypt.hash(password, 12).then(hasedPassword => {
+        bcrypt.hash(password, 12).then(hasedPassword => {
             const user = new User({
                 email: email,
                 password: hasedPassword,
@@ -62,9 +88,9 @@ exports.postSignUpPage = (req, res, next) => {
                     subject: 'You are successfully signed up',
                     text: 'Success'
                 });
-            }).catch(err => {console.log(err)});
-    });
-}
+            }).catch(err => {console.log(err);
+        });
+    }
 
 // getResetPage() is the middleware function to handle the GET request to respond when user tries to reset their password from the login page of the applicaton.
 // navigation -> clicked on "Login" in the menu -> Click on the "Reset Password" link -> redirect to view "reset" page.
