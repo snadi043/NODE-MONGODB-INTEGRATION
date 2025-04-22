@@ -1,5 +1,7 @@
 const Product = require('../models/product');
 
+const { validationResult } = require('express-validator');
+
 // getAddProduct() is the middleware function to handle the GET request to respond when admin tries to add a admin managed product to the list of products.
 // navigation -> clicked on "Add Product" in the menu to redirect to view "add-product".
 exports.getAddProduct = (req, res, next) => {
@@ -7,6 +9,15 @@ exports.getAddProduct = (req, res, next) => {
     pageTitle: 'Add Product',
     path: '/admin/add-product',
     editing: false,
+    errorFields: {
+      title: '',
+      imageUrl: '',
+      price: '',
+      description: ''
+    },
+    errorMessage: null,
+    hasErrors: false,
+    errorArray: []
   });
 };
 
@@ -17,6 +28,31 @@ exports.postAddProduct = (req, res, next) => {
   const price = req.body.price;
   const imageUrl = req.body.imageUrl;
   const description = req.body.description;
+
+  const errors = validationResult(req);
+  console.log(errors.array());
+  if(!errors.isEmpty()){
+    return res.status(422).render('admin/edit-product', {
+      pageTitle: 'Add Product',
+      path: '/admin/add-product',
+      editing: false,
+      hasErrors: true,
+        product: {
+          title: title,
+          imageUrl: imageUrl,
+          price: price,
+          description: description
+        },
+      errorMessage: errors.array()[0].msg,
+      errorArray: errors.array(),
+      errorFields: {
+          title: title,
+          imageUrl: imageUrl,
+          price: price,
+          description: description
+        },
+      });
+    }
   const product = new Product({title: title, price: price, imageUrl: imageUrl, description: description, userId: req.user});
     product.save().then(result => {
       console.log('Created Product');
@@ -45,6 +81,9 @@ exports.getEditProduct = (req, res, next) => {
         path: '/admin/edit-product',
         editing: editMode,
         product: product,
+        errorMessage: null,
+        hasErrors: false,
+        errorArray: [],
       });
     })
     .catch(err => console.log(err));
@@ -58,6 +97,31 @@ exports.postEditProduct = (req, res, next) => {
   const updatedPrice = req.body.price;
   const updatedImageUrl = req.body.imageUrl;
   const updatedDesc = req.body.description;
+
+  const errors = validationResult(req);
+  if(!errors.isEmpty()){
+    return res.status(422).render('admin/edit-product', {
+      pageTitle: 'Edit Product',
+      path: '/admin/edit-product',
+      editing: true,
+      product: {
+        title: updatedTitle,
+        imageUrl: updatedImageUrl,
+        price: updatedPrice,
+        description: updatedDesc,
+        // prod_Id: prodId 
+      },
+      errorFields: {
+        title: updatedTitle,
+        imageUrl: updatedImageUrl,
+        price: updatedPrice,
+        description: updatedDesc,
+      },
+      hasErrors: true,
+      errorMessage: errors.array()[0].msg,
+      errorArray: errors.array(),
+    });
+  }
   // Adding the filter to check for the right user with admin access only to edit the products he/she is created.
   Product.findById(prodId).then(product => {
     if(product.userId.toString() !== req.user._id.toString()){
