@@ -3,6 +3,7 @@ const path = require('path');
 const express = require('express');
 
 const bodyParser = require('body-parser');
+const multer = require('multer'); // Multer is the package that handles the data in the form of the file/files from the body by injecting a object into the request.
 
 const session = require('express-session');
 
@@ -37,6 +38,10 @@ const authRoutes = require('./routes/auth');
 const signupRoutes = require('./routes/signup');
 
 app.use(bodyParser.urlencoded({ extended: false }));
+
+const upload = multer({dest: 'images'}); // Configuring multer package to store the images in the application.
+console.log(upload);
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(require('express-session')({

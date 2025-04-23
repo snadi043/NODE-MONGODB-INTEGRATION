@@ -28,9 +28,25 @@ exports.getAddProduct = (req, res, next) => {
 exports.postAddProduct = (req, res, next) => {
   const title = req.body.title;
   const price = req.body.price;
-  const imageUrl = req.body.imageUrl;
+  const image = req.file;
   const description = req.body.description;
+  console.log(image);
 
+  if(!image){
+    return res.status(422).render('admin/edit-product', {
+      pageTitle: 'Add Product',
+      path: '/admin/edit-product',
+      editing: false,
+      hasErrors: true,
+        product: {
+          title: title,
+          imageUrl: image, 
+          price: price,
+          description: description
+        },
+      });
+    }
+    
   const errors = validationResult(req);
   // console.log(errors.array());
   if(!errors.isEmpty()){
@@ -57,7 +73,7 @@ exports.postAddProduct = (req, res, next) => {
     }
   const product = new Product(
     {
-      _id: new mongoose.Types.ObjectId('67f425b45f19bd0ed9d9557e'),
+      _id: new mongoose.Types.ObjectId('67f425b45f19bd0ed9d9557e'), // Voluntarily added the _id field to work with the Error mechanisms to render and handle the network related errors (500).
       title: title, 
       price: price, 
       imageUrl: imageUrl, 
