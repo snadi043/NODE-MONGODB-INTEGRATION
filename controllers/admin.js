@@ -65,7 +65,7 @@ exports.postAddProduct = (req, res, next) => {
       errorArray: errors.array(),
       errorFields: {
           title: title,
-          imageUrl: imageUrl,
+          imageUrl: image,
           price: price,
           description: description
         },

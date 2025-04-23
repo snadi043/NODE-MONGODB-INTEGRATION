@@ -29,16 +29,26 @@ const store = new MongoDBStore({
   collection: 'session'
 });
 
+// Configuring multer to handle the filename and filepath in the codebase.
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'images');
   },
   filename: (req, file, cb) => {
-    const imageName = Date.now() + '-' + file.originalname;
+    const imageName = new Date().toISOString() + '-' + file.originalname;
     cb(null, file.fieldname + '-' + imageName);
   }
 });
 
+// Configuring multer to handle what type of files (format) to be uploaded in the application.
+const fileFilter = (req, file, cb) => {
+  if(file.mimetype === 'image/jpg' || file.mimetype === 'image/png' || file.mimetype === 'image/jpeg'){
+    cb(null, true);
+  }
+  else{
+    cb(null, false);
+  }
+}
 
 app.set('view engine', 'ejs');
 app.set('views', 'views');
@@ -50,7 +60,7 @@ const signupRoutes = require('./routes/signup');
 
 app.use(bodyParser.urlencoded({ extended: false }));
 
-app.use(multer({storage: storage}).single('image')); // Configuring multer package to store the images in the application.
+app.use(multer({storage: storage, fileFilter: fileFilter}).single('image')); // Configuring multer package to store the images in the application.
 
 app.use(express.static(path.join(__dirname, 'public')));
 
