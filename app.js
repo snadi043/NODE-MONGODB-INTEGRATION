@@ -1,6 +1,7 @@
 const path = require('path');
 
 const express = require('express');
+
 const bodyParser = require('body-parser');
 
 const session = require('express-session');
@@ -13,9 +14,9 @@ const csrf = require('csurf');
 const flash = require('connect-flash');
 
 const errorController = require('./controllers/error');
+
 const User = require('./models/user');
 
-// 
 const MONGODB_URI = 'mongodb+srv://NodeMongo:node-mongo-integration@node-mongo-integration.025ge.mongodb.net/shop?w=majority&appName=Node-Mongo-Integration';
 
 const csrfToken = csrf(); // Initializing the CSRF token to use in the application.
@@ -66,7 +67,10 @@ app.use((req, res, next) => {
       req.user = user;
       next();
     })
-    .catch(err => console.log(err));
+    .catch(err => {
+      // console.log(err)
+      throw new Error(err);
+    });
 });
 
 app.use('/admin', adminRoutes);
@@ -74,6 +78,7 @@ app.use(shopRoutes);
 app.use(authRoutes);
 app.use(signupRoutes);
 
+app.use('/500', errorController.get500);
 app.use(errorController.get404);
 
 mongoose

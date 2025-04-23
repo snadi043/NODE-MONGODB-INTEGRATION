@@ -43,13 +43,7 @@
             </div>
             <div class="form-control">
                 <label for="description">Description</label>
-                <textarea
-                    class="<%= errorArray.find(e => e.path === 'description') ? 'invalid' : '' %>" 
-                    name="description" 
-                    id="description" 
-                    rows="5">
-                    <%if(editing || hasErrors){%><%=product.description%><%}%>
-                </textarea>
+                <textarea class="<%= errorArray.find(e => e.path === 'description') ? 'invalid' : '' %>" name="description" id="description" rows="5"> <%if(editing || hasErrors){%><%=product.description%><%}%></textarea>
             </div>
             <%if(editing){%>
                 <input type="hidden" value="<%=product._id%>" name="productId">
