@@ -46,7 +46,7 @@ exports.postAddProduct = (req, res, next) => {
         },
       });
     }
-    
+
   const errors = validationResult(req);
   // console.log(errors.array());
   if(!errors.isEmpty()){
@@ -57,7 +57,7 @@ exports.postAddProduct = (req, res, next) => {
       hasErrors: true,
         product: {
           title: title,
-          imageUrl: imageUrl,
+          imageUrl: image,
           price: price,
           description: description
         },

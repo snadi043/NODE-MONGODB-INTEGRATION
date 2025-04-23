@@ -29,6 +29,17 @@ const store = new MongoDBStore({
   collection: 'session'
 });
 
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'images');
+  },
+  filename: (req, file, cb) => {
+    const imageName = Date.now() + '-' + file.originalname;
+    cb(null, file.fieldname + '-' + imageName);
+  }
+});
+
+
 app.set('view engine', 'ejs');
 app.set('views', 'views');
 
@@ -39,8 +50,7 @@ const signupRoutes = require('./routes/signup');
 
 app.use(bodyParser.urlencoded({ extended: false }));
 
-const upload = multer({dest: 'images'}); // Configuring multer package to store the images in the application.
-console.log(upload);
+app.use(multer({storage: storage}).single('image')); // Configuring multer package to store the images in the application.
 
 app.use(express.static(path.join(__dirname, 'public')));
 
