@@ -63,6 +63,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(multer({storage: storage, fileFilter: fileFilter}).single('image')); // Configuring multer package to store the images in the application.
 
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/images', express.static(path.join(__dirname, 'images')));
+
 
 app.use(require('express-session')({
   secret: 'my secret',
