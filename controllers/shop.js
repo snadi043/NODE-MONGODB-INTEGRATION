@@ -1,6 +1,9 @@
 const Product = require('../models/product');
 const Order = require('../models/order');
 
+const path = require('path');
+const fs = require('fs');
+
 exports.getProducts = (req, res, next) => {
   Product.find()
     .then(products => {
@@ -123,3 +126,18 @@ exports.getOrders = (req, res, next) => {
     })
     .catch(err => console.log(err));
 };
+
+// Configuring the invoice HTTP GET request to handle the invoice generation in the pdf format in the application.
+exports.getInvoice = (req, res, next) => {
+  const orderId = req.params.orderId;
+  const filename = 'invoice-' + orderId + '.pdf';
+  const filepath = path.join('data', 'invoices', filename);
+  fs.readFile(filepath, (err, data) => {
+    if(err){
+      return next(err);
+    }
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'inline; filename="' + filename + '"'); // Setting the appropriate filename to the pdf document while downloading the file.
+    res.send(data);
+  });
+}
