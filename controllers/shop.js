@@ -130,14 +130,25 @@ exports.getOrders = (req, res, next) => {
 // Configuring the invoice HTTP GET request to handle the invoice generation in the pdf format in the application.
 exports.getInvoice = (req, res, next) => {
   const orderId = req.params.orderId;
-  const filename = 'invoice-' + orderId + '.pdf';
-  const filepath = path.join('data', 'invoices', filename);
-  fs.readFile(filepath, (err, data) => {
-    if(err){
-      return next(err);
+  // Adding the validation check where to filter the user if he/she has the access to order a product by verifying their user id.
+  Order.findById(orderId).then(order => {
+    if(!order){
+      return next (new Error(err, 'Something went wrong.' ));
     }
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', 'inline; filename="' + filename + '"'); // Setting the appropriate filename to the pdf document while downloading the file.
-    res.send(data);
-  });
+    if(order.user.userId.toString() !== req.user._id.toString()){
+      return next(new Error(err, 'UnAuthorized. You do not have the access to make the orders.'));
+    }
+    const filename = 'invoice-' + orderId + '.pdf';
+    const filepath = path.join('data', 'invoices', filename);
+    fs.readFile(filepath, (err, data) => {
+      if(err){
+        return next(err);
+      }
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', 'inline; filename="' + filename + '"'); // Setting the appropriate filename to the pdf document while downloading the file.
+      res.send(data);
+    });
+  }).catch(err => {
+    console.log(err);
+  })
 }
