@@ -140,15 +140,19 @@ exports.getInvoice = (req, res, next) => {
     }
     const filename = 'invoice-' + orderId + '.pdf';
     const filepath = path.join('data', 'invoices', filename);
-    fs.readFile(filepath, (err, data) => {
-      if(err){
-        return next(err);
-      }
+    // fs.readFile(filepath, (err, data) => {
+    //   if(err){
+    //     return next(err);
+    //   }
+    //   res.setHeader('Content-Type', 'application/pdf');
+    //   res.setHeader('Content-Disposition', 'inline; filename="' + filename + '"'); // Setting the appropriate filename to the pdf document while downloading the file.
+    //   res.send(data);
+    // });
+    const file = fs.createReadStream(filepath); // Reading the file in the form of the stream to avoid easy memory outages when dealing with large volume of file/files.
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', 'inline; filename="' + filename + '"'); // Setting the appropriate filename to the pdf document while downloading the file.
-      res.send(data);
-    });
+      file.pipe(res); // Pipe() is the method to be used to handle the large files to do a write action of the files.
   }).catch(err => {
-    console.log(err);
+      next(err);
   })
 }
