@@ -4,6 +4,10 @@ const Order = require('../models/order');
 const path = require('path');
 const fs = require('fs');
 
+// Importing the PDFKit package in the file and configuring it to use it in the controller.
+const PDFDocument = require('pdfkit');
+const doc = new PDFDocument(); 
+
 exports.getProducts = (req, res, next) => {
   Product.find()
     .then(products => {
@@ -140,6 +144,9 @@ exports.getInvoice = (req, res, next) => {
     }
     const filename = 'invoice-' + orderId + '.pdf';
     const filepath = path.join('data', 'invoices', filename);
+
+    // -- reading the entire file in a single go -- //
+
     // fs.readFile(filepath, (err, data) => {
     //   if(err){
     //     return next(err);
@@ -148,10 +155,23 @@ exports.getInvoice = (req, res, next) => {
     //   res.setHeader('Content-Disposition', 'inline; filename="' + filename + '"'); // Setting the appropriate filename to the pdf document while downloading the file.
     //   res.send(data);
     // });
-    const file = fs.createReadStream(filepath); // Reading the file in the form of the stream to avoid easy memory outages when dealing with large volume of file/files.
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', 'inline; filename="' + filename + '"'); // Setting the appropriate filename to the pdf document while downloading the file.
-      file.pipe(res); // Pipe() is the method to be used to handle the large files to do a write action of the files.
+    
+    // -- reading the file as a stream of data. -- //
+
+    // const file = fs.createReadStream(filepath); // Reading the file in the form of the stream to avoid easy memory outages when dealing with large volume of file/files.
+    // res.setHeader('Content-Type', 'application/pdf');
+    // res.setHeader('Content-Disposition', 'inline; filename="' + filename + '"'); // Setting the appropriate filename to the pdf document while downloading the file.
+    // file.pipe(res); // Pipe() is the method to be used to handle the large files to do a write action of the files.
+    
+    // -- Configuring the PDFKit package through "doc" to write the data into the file of PDF format on the fly when reading the document.
+    doc.pipe(fs.createWriteStream(filepath));
+    doc.fontSize(24).text('Invoice');
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'inline; filename="' + filename + '"'); // Setting the appropriate filename to the pdf document while downloading the file.
+    doc.pipe(res); // Pipe() is the method to be used to handle the large files to do a write action of the files.
+
+    doc.end();
+
   }).catch(err => {
       next(err);
   })
