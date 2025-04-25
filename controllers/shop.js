@@ -165,7 +165,24 @@ exports.getInvoice = (req, res, next) => {
     
     // -- Configuring the PDFKit package through "doc" to write the data into the file of PDF format on the fly when reading the document.
     doc.pipe(fs.createWriteStream(filepath));
-    doc.fontSize(24).text('Invoice');
+    doc.fontSize(24).text('Invoice', {
+      underline: true,
+    });
+    doc.text('--------------------');
+    doc.fontSize(20).text('Order Item List', {
+      underline: true
+    });
+    let totalPrice = 0;
+    order.products.forEach(prod => {
+      totalPrice += prod.quantity *  prod.product.price; 
+      doc
+        .fontSize(14)
+        .text(prod.product.title + '-' + prod.quantity + '*' + '$' + prod.product.price);
+      doc.text('--------------');
+      doc
+      .fontSize(20)
+      .text('Total Price' + '=' + '$' + totalPrice);
+    });
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'inline; filename="' + filename + '"'); // Setting the appropriate filename to the pdf document while downloading the file.
     doc.pipe(res); // Pipe() is the method to be used to handle the large files to do a write action of the files.
