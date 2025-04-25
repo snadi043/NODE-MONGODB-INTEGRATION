@@ -3,6 +3,7 @@ const path = require('path');
 const express = require('express');
 
 const bodyParser = require('body-parser');
+const multer = require('multer'); // Multer is the package that handles the data in the form of the file/files from the body by injecting a object into the request.
 
 const session = require('express-session');
 
@@ -28,6 +29,27 @@ const store = new MongoDBStore({
   collection: 'session'
 });
 
+// Configuring multer to handle the filename and filepath in the codebase.
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'images');
+  },
+  filename: (req, file, cb) => {
+    const imageName = new Date().toISOString() + '-' + file.originalname;
+    cb(null, file.fieldname + '-' + imageName);
+  }
+});
+
+// Configuring multer to handle what type of files (format) to be uploaded in the application.
+const fileFilter = (req, file, cb) => {
+  if(file.mimetype === 'image/jpg' || file.mimetype === 'image/png' || file.mimetype === 'image/jpeg'){
+    cb(null, true);
+  }
+  else{
+    cb(null, false);
+  }
+}
+
 app.set('view engine', 'ejs');
 app.set('views', 'views');
 
@@ -37,7 +59,12 @@ const authRoutes = require('./routes/auth');
 const signupRoutes = require('./routes/signup');
 
 app.use(bodyParser.urlencoded({ extended: false }));
+
+app.use(multer({storage: storage, fileFilter: fileFilter}).single('image')); // Configuring multer package to store the images in the application.
+
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/images', express.static(path.join(__dirname, 'images')));
+
 
 app.use(require('express-session')({
   secret: 'my secret',

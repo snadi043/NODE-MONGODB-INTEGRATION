@@ -4,6 +4,9 @@ const Product = require('../models/product');
 
 const { validationResult } = require('express-validator');
 
+const deleteFile = require('../util/delete');
+const product = require('../models/product');
+
 // getAddProduct() is the middleware function to handle the GET request to respond when admin tries to add a admin managed product to the list of products.
 // navigation -> clicked on "Add Product" in the menu to redirect to view "add-product".
 exports.getAddProduct = (req, res, next) => {
@@ -28,11 +31,27 @@ exports.getAddProduct = (req, res, next) => {
 exports.postAddProduct = (req, res, next) => {
   const title = req.body.title;
   const price = req.body.price;
-  const imageUrl = req.body.imageUrl;
+  const image = req.file; // Accessing the entire file object using the multer package which adds a file type into the body of the request. 
   const description = req.body.description;
+  // Checking the case if the image field is not set (like the required format file is not selected by the user) -> In such case we don't pass the image value to in the response.
+  // Instead dislay an error with fitting message on the browser. 
+  if(!image){
+    return res.status(422).render('admin/edit-product', {
+      pageTitle: 'Add Product',
+      path: '/admin/add-product',
+      editing: false,
+      hasErrors: true,
+        product: {
+          title: title,
+          price: price,
+          description: description
+        },
+      errorMessage: 'Invalid input file.',
+      errorArray: [],
+      });
+    }
 
   const errors = validationResult(req);
-  // console.log(errors.array());
   if(!errors.isEmpty()){
     return res.status(422).render('admin/edit-product', {
       pageTitle: 'Add Product',
@@ -41,7 +60,6 @@ exports.postAddProduct = (req, res, next) => {
       hasErrors: true,
         product: {
           title: title,
-          imageUrl: imageUrl,
           price: price,
           description: description
         },
@@ -49,18 +67,22 @@ exports.postAddProduct = (req, res, next) => {
       errorArray: errors.array(),
       errorFields: {
           title: title,
-          imageUrl: imageUrl,
+          imageUrl: image,
           price: price,
           description: description
         },
       });
     }
+  
+  // If the execution passes the above validation block which means an image file with proper format is selected so store the file path in the response to the database.   
+  const imageUrl = image.path;
+
   const product = new Product(
     {
-      _id: new mongoose.Types.ObjectId('67f425b45f19bd0ed9d9557e'),
+      // _id: new mongoose.Types.ObjectId('67f425b45f19bd0ed9d9557e'), // Voluntarily added the _id field to work with the Error mechanisms to render and handle the network related errors (500).
       title: title, 
       price: price, 
-      imageUrl: imageUrl, 
+      imageUrl: imageUrl, // 
       description: description, 
       userId: req.user
     });
@@ -106,8 +128,26 @@ exports.postEditProduct = (req, res, next) => {
   const prodId = req.body.productId;
   const updatedTitle = req.body.title;
   const updatedPrice = req.body.price;
-  const updatedImageUrl = req.body.imageUrl;
+  const image = req.file; // Accessing the entire file object using the multer package which adds a file type into the body of the request. 
   const updatedDesc = req.body.description;
+
+  // Checking the case if the image field is not set (like the required format file is not selected by the user) -> In such case we don't pass the image value to in the response.
+  // Instead dislay an error with fitting message on the browser. 
+  if(!image){
+    return res.status(422).render('admin/edit-product', {
+      pageTitle: 'Edit Product',
+      path: '/admin/edit-product',
+      editing: true,
+      product: {
+        title: updatedTitle,
+        price: updatedPrice,
+        description: updatedDesc,
+        _id: prodId
+      },
+      errorMessage: 'Invalid file format',
+      errorArray: [],
+  });
+}
 
   const errors = validationResult(req);
   if(!errors.isEmpty()){
@@ -117,14 +157,12 @@ exports.postEditProduct = (req, res, next) => {
       editing: true,
       product: {
         title: updatedTitle,
-        imageUrl: updatedImageUrl,
         price: updatedPrice,
         description: updatedDesc,
         _id: prodId
       },
       errorFields: {
         title: updatedTitle,
-        imageUrl: updatedImageUrl,
         price: updatedPrice,
         description: updatedDesc,
       },
@@ -133,6 +171,7 @@ exports.postEditProduct = (req, res, next) => {
       errorArray: errors.array(),
     });
   }
+  
   // Adding the filter to check for the right user with admin access only to edit the products he/she is created.
   Product.findById(prodId).then(product => {
     if(product.userId.toString() !== req.user._id.toString()){
@@ -140,7 +179,10 @@ exports.postEditProduct = (req, res, next) => {
     }
     product.title = updatedTitle;
     product.price = updatedPrice;
-    product.imageUrl = updatedImageUrl;
+      if(image){
+        product.imageUrl = image.path; // Storing the image path into the database in the edit request.  
+        deleteFile.deleteFile(product.imageUrl);
+      }
     product.description = updatedDesc;
     return product.save()
     .then(result => {
@@ -170,11 +212,18 @@ exports.getProducts = (req, res, next) => {
 // navigation -> clicked on "Admin Products" in the menu to redirect to view "products" -> clicked on "DELETE" button ->  deleted it in the database.
 exports.postDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
-  // Adding the filter to allow the access to the user to delete the product if he/she has proper userId and he/she only added that same product which he/she is trying to delete. 
-  Product.deleteOne({_id : prodId, userId: req.user._id})
+  Product.findById(prodId).then(product => {
+    if(!product){
+      return next(new Error('Product not found'));
+    }
+    deleteFile.deleteFile(product.imageUrl);
+    return Product.deleteOne({_id : prodId, userId: req.user._id})   // Adding the filter to allow the access to the user to delete the product if he/she has proper userId and he/she only added that same product which he/she is trying to delete. 
+  })
     .then(() => {
       console.log('DESTROYED PRODUCT');
       res.redirect('/admin/products');
     })
-    .catch(err => console.log(err));
+  .catch(err => {
+    throw next(err);
+  })
 };

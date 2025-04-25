@@ -1,6 +1,13 @@
 const Product = require('../models/product');
 const Order = require('../models/order');
 
+const path = require('path');
+const fs = require('fs');
+
+// Importing the PDFKit package in the file and configuring it to use it in the controller.
+const PDFDocument = require('pdfkit');
+const doc = new PDFDocument(); 
+
 exports.getProducts = (req, res, next) => {
   Product.find()
     .then(products => {
@@ -123,3 +130,66 @@ exports.getOrders = (req, res, next) => {
     })
     .catch(err => console.log(err));
 };
+
+// Configuring the invoice HTTP GET request to handle the invoice generation in the pdf format in the application.
+exports.getInvoice = (req, res, next) => {
+  const orderId = req.params.orderId;
+  // Adding the validation check where to filter the user if he/she has the access to order a product by verifying their user id.
+  Order.findById(orderId).then(order => {
+    if(!order){
+      return next (new Error(err, 'Something went wrong.' ));
+    }
+    if(order.user.userId.toString() !== req.user._id.toString()){
+      return next(new Error(err, 'UnAuthorized. You do not have the access to make the orders.'));
+    }
+    const filename = 'invoice-' + orderId + '.pdf';
+    const filepath = path.join('data', 'invoices', filename);
+
+    // -- reading the entire file in a single go -- //
+
+    // fs.readFile(filepath, (err, data) => {
+    //   if(err){
+    //     return next(err);
+    //   }
+    //   res.setHeader('Content-Type', 'application/pdf');
+    //   res.setHeader('Content-Disposition', 'inline; filename="' + filename + '"'); // Setting the appropriate filename to the pdf document while downloading the file.
+    //   res.send(data);
+    // });
+    
+    // -- reading the file as a stream of data. -- //
+
+    // const file = fs.createReadStream(filepath); // Reading the file in the form of the stream to avoid easy memory outages when dealing with large volume of file/files.
+    // res.setHeader('Content-Type', 'application/pdf');
+    // res.setHeader('Content-Disposition', 'inline; filename="' + filename + '"'); // Setting the appropriate filename to the pdf document while downloading the file.
+    // file.pipe(res); // Pipe() is the method to be used to handle the large files to do a write action of the files.
+    
+    // -- Configuring the PDFKit package through "doc" to write the data into the file of PDF format on the fly when reading the document.
+    doc.pipe(fs.createWriteStream(filepath));
+    doc.fontSize(24).text('Invoice', {
+      underline: true,
+    });
+    doc.text('--------------------');
+    doc.fontSize(20).text('Order Item List', {
+      underline: true
+    });
+    let totalPrice = 0;
+    order.products.forEach(prod => {
+      totalPrice += prod.quantity *  prod.product.price; 
+      doc
+        .fontSize(14)
+        .text(prod.product.title + '-' + prod.quantity + '*' + '$' + prod.product.price);
+      doc.text('--------------');
+      doc
+      .fontSize(20)
+      .text('Total Price' + '=' + '$' + totalPrice);
+    });
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'inline; filename="' + filename + '"'); // Setting the appropriate filename to the pdf document while downloading the file.
+    doc.pipe(res); // Pipe() is the method to be used to handle the large files to do a write action of the files.
+
+    doc.end();
+
+  }).catch(err => {
+      next(err);
+  })
+}
