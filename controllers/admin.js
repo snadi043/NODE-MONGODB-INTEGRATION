@@ -4,6 +4,9 @@ const Product = require('../models/product');
 
 const { validationResult } = require('express-validator');
 
+const deleteFile = require('../util/delete');
+const product = require('../models/product');
+
 // getAddProduct() is the middleware function to handle the GET request to respond when admin tries to add a admin managed product to the list of products.
 // navigation -> clicked on "Add Product" in the menu to redirect to view "add-product".
 exports.getAddProduct = (req, res, next) => {
@@ -178,6 +181,7 @@ exports.postEditProduct = (req, res, next) => {
     product.price = updatedPrice;
       if(image){
         product.imageUrl = image.path; // Storing the image path into the database in the edit request.  
+        deleteFile.deleteFile(product.imageUrl);
       }
     product.description = updatedDesc;
     return product.save()
@@ -208,11 +212,18 @@ exports.getProducts = (req, res, next) => {
 // navigation -> clicked on "Admin Products" in the menu to redirect to view "products" -> clicked on "DELETE" button ->  deleted it in the database.
 exports.postDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
-  // Adding the filter to allow the access to the user to delete the product if he/she has proper userId and he/she only added that same product which he/she is trying to delete. 
-  Product.deleteOne({_id : prodId, userId: req.user._id})
+  Product.findById(prodId).then(product => {
+    if(!product){
+      return next(new Error('Product not found'));
+    }
+    deleteFile.deleteFile(product.imageUrl);
+    return Product.deleteOne({_id : prodId, userId: req.user._id})   // Adding the filter to allow the access to the user to delete the product if he/she has proper userId and he/she only added that same product which he/she is trying to delete. 
+  })
     .then(() => {
       console.log('DESTROYED PRODUCT');
       res.redirect('/admin/products');
     })
-    .catch(err => console.log(err));
+  .catch(err => {
+    throw next(err);
+  })
 };
