@@ -8,7 +8,7 @@ const fs = require('fs');
 const PDFDocument = require('pdfkit');
 const doc = new PDFDocument(); 
 
-const ITEMS_PER_PAGE = 2;
+const ITEMS_PER_PAGE = 1;
 
 exports.getProducts = (req, res, next) => {
   Product.find()
@@ -38,17 +38,31 @@ exports.getProduct = (req, res, next) => {
 };
 
 exports.getIndex = (req, res, next) => {
-  const page = req.query.page;
-  Product.find()
+  const page = +req.query.page || 1;
+  let totalItems;
+  Product
+  .find()
+  .countDocuments()
+  .then(numOfProducts => 
+    {
+    totalItems = numOfProducts;
+    return Product.find()
   // skip() -> It is a mongoDB method which takes in integer value that helps to skip the datapoints for the next page while implementing the feature of pagination.
   // limit() -> It is a mongoDB method which controls the number of datapoints that has to be displayed on each page while implementing pagination in the application. 
   .skip((page -1) * ITEMS_PER_PAGE) 
   .limit(ITEMS_PER_PAGE)
+  })
     .then(products => {
       res.render('shop/index', {
         prods: products,
         pageTitle: 'Shop',
         path: '/',
+        currentPage: page,
+        hasNextPage: ITEMS_PER_PAGE * page < totalItems,
+        hasPreviousPage: page > 1,
+        nextPage: page + 1,
+        previousPage: page - 1,
+        lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE)
       });
     })
     .catch(err => {
