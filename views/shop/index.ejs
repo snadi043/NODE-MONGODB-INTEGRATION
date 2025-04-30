@@ -24,8 +24,8 @@
                         <div class="card__actions">
                             <a href="/products/<%= product._id %>" class="btn">Details</a>
                             <% if (isAuthenticated) { %>
-                                <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-                                <%- include('../includes/add-to-cart.ejs', {product: product})%>
+                                <input type="hidden" name="_csrf" value="<%=csrfToken%>" />
+                                <%- include('../includes/add-to-cart.ejs', {product: product}) %>
                             <% } %>
                         </div>
                     </article>
@@ -34,5 +34,9 @@
         <% } else { %>
             <h1>No Products Found!</h1>
         <% } %>
+        <section class="pagination">
+            <a href="/?page=1">1</a>
+            <a href="/?page=2">2</a>
+        </section>
     </main>
 <%- include('../includes/end.ejs') %>
