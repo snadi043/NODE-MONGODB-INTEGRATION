@@ -210,8 +210,8 @@ exports.getProducts = (req, res, next) => {
 
 // postDeleteProduct() is the middleware function to handle the POST request to respond when admin deletes an admin managed product after clicking on "DELETE" button.
 // navigation -> clicked on "Admin Products" in the menu to redirect to view "products" -> clicked on "DELETE" button ->  deleted it in the database.
-exports.postDeleteProduct = (req, res, next) => {
-  const prodId = req.body.productId;
+exports.deleteProduct = (req, res, next) => {
+  const prodId = req.params.productId;
   Product.findById(prodId).then(product => {
     if(!product){
       return next(new Error('Product not found'));
@@ -221,9 +221,9 @@ exports.postDeleteProduct = (req, res, next) => {
   })
     .then(() => {
       console.log('DESTROYED PRODUCT');
-      res.redirect('/admin/products');
+      res.status(200).json({message: 'Item Deleted'});
     })
   .catch(err => {
-    throw next(err);
-  })
+   res.status(500).json({message: 'Failed to delete item'});
+  });
 };

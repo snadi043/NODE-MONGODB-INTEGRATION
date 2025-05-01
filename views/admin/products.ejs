@@ -28,11 +28,12 @@
                                 </div>
                                 <div class="card__actions">
                                     <a href="/admin/edit-product/<%=product._id%>?edit=true" class="btn">Edit</a>
-                                    <form action="/admin/delete-product" method="POST">
-                                        <input type="hidden" value="<%=product._id%>" name="productId">
-                                        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-                                        <button class="btn" type="submit">Delete</button>
-                                    </form>
+                                    <!-- Commenting the "form" which is the reason for sending the POST HTTP request from the client to the server to then handle the deletion of products through the controller-->
+                                    <!-- <form action="/admin/delete-product" method="POST"> -->
+                                        <input type="hidden" value="<%=product._id%>" name="productId" id="productId"/>
+                                        <input type="hidden" name="_csrf" id="_csrf" value="<%= csrfToken %>" />
+                                        <button class="btn" type="button" onclick="deleteProduct(event)">Delete</button>
+                                    <!-- </form> -->
                                 </div>
                             </article>
                             <% } %>
@@ -42,3 +43,5 @@
                         <% } %>
             </main>
             <%- include('../includes/end.ejs') %>
+            <!-- Attaching the script file at the bottom so that the js file gets parsed and then executed after the ejs file is parsed.-->
+            <script src="/js/admin.js"></script> 
