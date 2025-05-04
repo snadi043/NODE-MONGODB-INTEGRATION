@@ -101,7 +101,11 @@ exports.getCart = (req, res, next) => {
         products: products,
       });
     })
-  .catch(err => console.log(err));
+        .catch(err => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 };
 
 exports.postCart = (req, res, next) => {
@@ -114,7 +118,11 @@ exports.postCart = (req, res, next) => {
     res.redirect('/cart');
     console.log(result);
     })
-  .catch(err => {console.log(err)});
+    .catch(err => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
   }
 
 exports.postCartDeleteProduct = (req, res, next) => {
@@ -123,7 +131,11 @@ exports.postCartDeleteProduct = (req, res, next) => {
     .then(result => {
       res.redirect('/cart');
     })
-    .catch(err => console.log(err));
+    .catch(err => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 };
 
 exports.postOrder = (req, res, next) => {
@@ -155,21 +167,51 @@ exports.postOrder = (req, res, next) => {
     res.redirect('/orders');
   })
   .catch(err => {
-    console.log(err);
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   });
 };
 
-exports.getOrders = (req, res, next) => {
-  Order.find({'user.userId': req.user_id})
-    .then(orders => {
-      res.render('shop/orders', {
-        path: '/orders',
-        pageTitle: 'Your Orders',
-        orders: orders,
+// exports.getOrders = (req, res, next) => {
+//   Order.find({'user.userId': req.user_id})
+//     .then(orders => {
+//       res.render('shop/orders', {
+//         path: '/orders',
+//         pageTitle: 'Your Orders',
+//         orders: orders,
+//       });
+//     })
+//     .catch(err => console.log(err));
+// };
+
+exports.getCheckout = (req, res, next) => {
+  req.user
+  .populate('cart.items.productId') // populate() is the mongoose provided method which gets all the fields from the collection that is specified in the method.
+  // .execPopulate()
+    .then(user => {
+      const products = user.cart.items;
+      let total = 0;
+      products.forEach(p => {
+        total += p.quantity * p.productId.price;
+      })
+      res.render('shop/checkout', {
+        path: '/checkout',
+        pageTitle: 'Checkout',
+        products: products,
+        total: total
       });
     })
-    .catch(err => console.log(err));
-};
+  .catch(err => console.log(err));
+}
+
+exports.getSuccess = (req, res, next) => {
+
+}
+
+exports.getCancel = (req, res, next) => {
+  
+}
 
 // Configuring the invoice HTTP GET request to handle the invoice generation in the pdf format in the application.
 exports.getInvoice = (req, res, next) => {
