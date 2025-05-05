@@ -1,4 +1,4 @@
-const stripe = require('stripe')('sk_test_51RL2fHRtgdgPJkGggW2nFNJuIMAKqZuaHv3ovTX6nGLAlDEj6PBB1TVHLZXF0espqtg8IxdG7o70JfFohMtYI1AR00zq9EWYMp');
+const stripe = require('stripe')('');
 
 stripe.products.create({
   name: 'Online Purchase',
