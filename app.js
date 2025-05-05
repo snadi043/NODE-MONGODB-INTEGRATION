@@ -22,8 +22,6 @@ const MONGODB_URI = 'mongodb+srv://NodeMongo:node-mongo-integration@node-mongo-i
 
 const csrfToken = csrf(); // Initializing the CSRF token to use in the application.
 
-const stripe = require('stripe')('sk_test_51RL2fHRtgdgPJkGggW2nFNJuIMAKqZuaHv3ovTX6nGLAlDEj6PBB1TVHLZXF0espqtg8IxdG7o70JfFohMtYI1AR00zq9EWYMp');
-
 const app = express();
 
 const store = new MongoDBStore({
@@ -128,18 +126,4 @@ mongoose
   // To overcome this scenario and avoid such attacks happening with your site, the work around is to implement the CSRF Token in the views of the application.
   // CSRF tokens function in a way where a hashed token is set on the neccessary HTTP request and is mapped with the related to view to make that view as a secure page to render for the users.
   // The package used to implement this flow is "CSURF". This package does not render the views which are not holding the token when handled through the POST HTTP methods.
-
-
-  // stripe.customer.create({
-  //   email: 'onlineshop@example.com',
-  // })
-  // .then((customer) => {
-  //   return stripe.orders.create({
-  //     customer: customer.id,
-  //     amount: ,
-  //     currency: 'usd',
-  //     description: ''
-  //   })
-  // })
-  // .catch(err => console.log(err));
 
