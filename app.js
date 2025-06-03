@@ -18,6 +18,8 @@ const errorController = require('./controllers/error');
 
 const User = require('./models/user');
 
+console.log(process.env.NODE_ENV);
+
 // const MONGODB_URI = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@node-mongo-integration.025ge.mongodb.net/${process.env.MONGO_DATABASE}?retryWrites=true&w=majority`;
 const MONGODB_URI = `mongodb+srv://NodeMongo:NOdeMOngoDB@node-mongo-integration.025ge.mongodb.net/shop`
 
