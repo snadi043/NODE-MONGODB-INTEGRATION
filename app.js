@@ -1,5 +1,7 @@
 const path = require('path');
 
+const fs = require('fs');
+
 const express = require('express');
 
 const bodyParser = require('body-parser');
@@ -21,6 +23,10 @@ const helmet = require('helmet');
 // Compression is the packge which provides the functionality to minimize the file sizes in the application. 
 // This functionality is usually provided by hosting providers, if not then consider using it.
 const compression = require('compression'); 
+
+// Morgan is the package useful to log the request being called by the client to the server in our application with other useful information.
+// This functionality is usually provided by hosting providers, if not then consider using it.
+const morgan = require('morgan');
 
 const errorController = require('./controllers/error');
 
@@ -64,8 +70,11 @@ const fileFilter = (req, file, cb) => {
 app.set('view engine', 'ejs');
 app.set('views', 'views');
 
+const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), {flags: 'a'});
+
 app.use(helmet()); // Configuring the helmet middleware to trigger it for every api call in the application.
 app.use(compression()); // Configuring the compression middleware to trigger it for "js & css" files in the application.
+app.use(morgan('combined', {stream: accessLogStream}));
 
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
