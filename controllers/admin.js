@@ -5,7 +5,6 @@ const Product = require('../models/product');
 const { validationResult } = require('express-validator');
 
 const deleteFile = require('../util/delete');
-const product = require('../models/product');
 
 // getAddProduct() is the middleware function to handle the GET request to respond when admin tries to add a admin managed product to the list of products.
 // navigation -> clicked on "Add Product" in the menu to redirect to view "add-product".

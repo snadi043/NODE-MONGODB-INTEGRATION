@@ -8,6 +8,9 @@ const fs = require('fs');
 const PDFDocument = require('pdfkit');
 const doc = new PDFDocument(); 
 
+// Configuring the stripe payment package.
+const stripe = require('stripe')(process.env.STRIPE_API);
+
 const ITEMS_PER_PAGE = 1;
 
 exports.getProducts = (req, res, next) => {
@@ -127,37 +130,84 @@ exports.postCartDeleteProduct = (req, res, next) => {
 };
 
 exports.postOrder = (req, res, next) => {
-  // From the new OrderSchema, orders has two fields which are products (this is an object with all the product details) and
-  // the second one is users (that is also an object with all the user details).
-  
-  //Fetching the product details
-  const prod = req.user.populate('cart.items.productId')
-  .then(user => {
-    const products = user.cart.items.map(i => {
-      return{
-        quantity: i.quantity,
-        product: {...i.productId._doc} // _doc is the extension provided by mongoose to get access to the complete document.
-      };
+  // Token is created using Checkout or Elements!
+  // Get the payment token ID submitted by the form:
+  const token = req.body.stripeToken; // Using Express
+  let totalSum = 0;
+
+  req.user
+    .populate('cart.items.productId')
+    .execPopulate()
+    .then(user => {  
+      user.cart.items.forEach(p => {
+        totalSum += p.quantity * p.productId.price;
+      });
+
+      const products = user.cart.items.map(i => {
+        return { quantity: i.quantity, product: { ...i.productId._doc } };
+      });
+      const order = new Order({
+        user: {
+          email: req.user.email,
+          userId: req.user
+        },
+        products: products
+      });
+      return order.save();
+    })
+    .then(result => {
+      const charge = stripe.charges.create({
+        amount: totalSum * 100,
+        currency: 'usd',
+        description: 'Demo Order',
+        source: token,
+        metadata: { order_id: result._id.toString() }
+      });
+      console.log(charge);
+      return req.user.clearCart();
+    })
+    .then(() => {
+      res.redirect('/orders');
+    })
+    .catch(err => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
     });
-    const order = new Order({
-      user: {
-        email: req.user.email,
-        userId: req.user
-      },
-      products: products
-    });
-    order.save();
-  }).
-  then(result => {
-   return req.user.clearCart();
-  })
-  .then(() => {
-    res.redirect('/orders');
-  })
-  .catch(err => {
-    console.log(err);
-  });
 };
+
+// exports.postOrder = (req, res, next) => {
+//   // From the new OrderSchema, orders has two fields which are products (this is an object with all the product details) and
+//   // the second one is users (that is also an object with all the user details).
+  
+//   //Fetching the product details
+//   const prod = req.user.populate('cart.items.productId')
+//   .then(user => {
+//     const products = user.cart.items.map(i => {
+//       return{
+//         quantity: i.quantity,
+//         product: {...i.productId._doc} // _doc is the extension provided by mongoose to get access to the complete document.
+//       };
+//     });
+//     const order = new Order({
+//       user: {
+//         email: req.user.email,
+//         userId: req.user
+//       },
+//       products: products
+//     });
+//     order.save();
+//   }).
+//   then(result => {
+//    return req.user.clearCart();
+//   })
+//   .then(() => {
+//     res.redirect('/orders');
+//   })
+//   .catch(err => {
+//     console.log(err);
+//   });
+// };
 
 exports.getOrders = (req, res, next) => {
   Order.find({'user.userId': req.user_id})

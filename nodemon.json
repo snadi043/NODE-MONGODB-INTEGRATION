@@ -1,0 +1,11 @@
+{
+    "env": {
+        "MONGO_DATABASE": "shop",
+        "MONGO_PASSWORD": "NOdeMOngoDB",
+        "MONGO_USER": "NodeMongo",
+        "MONGODB_CLUSTER": "node-mongo-integration.025ge.mongodb.net", 
+        "STRIPE_API": "sk_test_51RL2fHRtgdgPJkGggW2nFNJuIMAKqZuaHv3ovTX6nGLAlDEj6PBB1TVHLZXF0espqtg8IxdG7o70JfFohMtYI1AR00zq9EWYMp",
+        "SENDGRID_API": "",
+        "PORT": ""
+    }
+}

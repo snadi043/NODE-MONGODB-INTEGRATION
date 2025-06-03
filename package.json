@@ -1,14 +1,15 @@
 {
-  "name": "nodejs-complete-guide",
+  "name": "node-mongodb-integration",
   "version": "1.0.0",
-  "description": "Complete Node.js Guide",
+  "description": "This is a project which is build using node and express framework to let the users create their profile, manage their products like buying, selling and interacting with their clients through emails and notifications.",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon app.js",
-    "start-server": "node app.js"
+    "start": "node app.js",
+    "start-server": "node app.js",
+    "start:dev": "nodemon app.js"
   },
-  "author": "Maximilian Schwarzmüller",
+  "author": "SAI",
   "license": "ISC",
   "devDependencies": {
     "nodemon": "^1.18.3"
@@ -17,14 +18,14 @@
     "bcryptjs": "^3.0.2",
     "body-parser": "^1.18.3",
     "connect-flash": "^0.1.1",
-    "connect-mongodb-session": "^5.0.0",
+    "connect-mongodb-session": "^2.0.3",
     "csurf": "^1.10.0",
     "ejs": "^2.6.1",
     "express": "^4.16.3",
     "express-handlebars": "^3.0.0",
     "express-session": "^1.18.1",
     "express-validator": "^7.2.1",
-    "mongodb": "^6.14.2",
+    "mongodb": "^6.16.0",
     "mongoose": "^8.12.2",
     "multer": "^1.4.5-lts.2",
     "mysql2": "^1.6.1",
@@ -32,6 +33,7 @@
     "nodemailer-sendgrid-transport": "^0.2.0",
     "pdfkit": "^0.17.0",
     "pug": "^2.0.3",
-    "sequelize": "^5.0.0-beta.11"
+    "sequelize": "^5.0.0-beta.11",
+    "stripe": "^6.12.1"
   }
 }

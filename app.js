@@ -18,7 +18,8 @@ const errorController = require('./controllers/error');
 
 const User = require('./models/user');
 
-const MONGODB_URI = 'mongodb+srv://NodeMongo:node-mongo-integration@node-mongo-integration.025ge.mongodb.net/shop?w=majority&appName=Node-Mongo-Integration';
+// const MONGODB_URI = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@node-mongo-integration.025ge.mongodb.net/${process.env.MONGO_DATABASE}?retryWrites=true&w=majority`;
+const MONGODB_URI = `mongodb+srv://NodeMongo:NOdeMOngoDB@node-mongo-integration.025ge.mongodb.net/shop`
 
 const csrfToken = csrf(); // Initializing the CSRF token to use in the application.
 
@@ -95,7 +96,6 @@ app.use((req, res, next) => {
       next();
     })
     .catch(err => {
-      // console.log(err)
       throw new Error(err);
     });
 });
@@ -111,7 +111,7 @@ app.use(errorController.get404);
 mongoose
   .connect(MONGODB_URI)
   .then(result => {
-    app.listen(3000);
+    app.listen(process.env.PORT || 3000);
   })
   .catch(err => {
     console.log(err);
