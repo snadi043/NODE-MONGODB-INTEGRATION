@@ -3,6 +3,7 @@ const path = require('path');
 const express = require('express');
 
 const bodyParser = require('body-parser');
+
 const multer = require('multer'); // Multer is the package that handles the data in the form of the file/files from the body by injecting a object into the request.
 
 const session = require('express-session');
@@ -13,6 +14,8 @@ const MongoDBStore = require('connect-mongodb-session')(session);
 const csrf = require('csurf');
 
 const flash = require('connect-flash');
+
+const helmet = require('helmet'); // Helmet is the package which provides additional security by setting the response headers in the application. 
 
 const errorController = require('./controllers/error');
 
@@ -55,6 +58,8 @@ const fileFilter = (req, file, cb) => {
 
 app.set('view engine', 'ejs');
 app.set('views', 'views');
+
+app.use(helmet()); // Configuring the helmet middleware to trigger it for every api call in the application.
 
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
