@@ -15,7 +15,12 @@ const csrf = require('csurf');
 
 const flash = require('connect-flash');
 
-const helmet = require('helmet'); // Helmet is the package which provides additional security by setting the response headers in the application. 
+// Helmet is the package which provides additional security by setting the response headers in the application. 
+const helmet = require('helmet'); 
+
+// Compression is the packge which provides the functionality to minimize the file sizes in the application. 
+// This functionality is usually provided by hosting providers, if not then consider using it.
+const compression = require('compression'); 
 
 const errorController = require('./controllers/error');
 
@@ -60,6 +65,7 @@ app.set('view engine', 'ejs');
 app.set('views', 'views');
 
 app.use(helmet()); // Configuring the helmet middleware to trigger it for every api call in the application.
+app.use(compression()); // Configuring the compression middleware to trigger it for "js & css" files in the application.
 
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
