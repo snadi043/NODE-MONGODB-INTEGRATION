@@ -2,6 +2,8 @@ const path = require('path');
 
 const fs = require('fs');
 
+// const https = require('https');
+
 const express = require('express');
 
 const bodyParser = require('body-parser');
@@ -74,7 +76,11 @@ const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'),
 
 app.use(helmet()); // Configuring the helmet middleware to trigger it for every api call in the application.
 app.use(compression()); // Configuring the compression middleware to trigger it for "js & css" files in the application.
-app.use(morgan('combined', {stream: accessLogStream}));
+app.use(morgan('combined', {stream: accessLogStream})); // Configuring the morgan middleware to create the log files in the application.
+
+// Usually this process of creating the key and the cerificate is provided by the hosting providers.
+// const privateKey = fs.readFileSync('server.key'); // Reading the ssl privateKey synchronously to continue only after the internal openssl process is processed.
+// const certificate = fs.readFileSync('server.cert'); // Reading the ssl certificate to use it while creating the server.
 
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
@@ -134,6 +140,7 @@ mongoose
   .connect(MONGODB_URI)
   .then(result => {
     app.listen(process.env.PORT || 3000);
+    // https.createServer({key: privateKey, cert: certificate}).listen(process.env.PORT || 3000);
   })
   .catch(err => {
     console.log(err);
